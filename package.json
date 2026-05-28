@@ -1,0 +1,28 @@
+{
+  "name": "Nyxen",
+  "version": "1.0.0",
+  "description": "AI-powered behavioral intelligence and protection platform",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/nyxen.git"
+  },
+  "keywords": [
+    "cybersecurity",
+    "ai",
+    "threat-detection",
+    "gemini",
+    "elastic",
+    "google-cloud",
+    "behavioral-intelligence",
+    "fraud-detection"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "docker": "^1.0.0"
+  }
+}

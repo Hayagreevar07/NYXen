@@ -1,109 +1,136 @@
-# Contributing to Nyxen
+# Contributing to MBook AI
 
-Thank you for your interest in contributing to Nyxen! This document provides guidelines and instructions for contributing.
+Thank you for contributing to the MBook AI Construction Verification System! This guide will help you get started.
 
-## Code of Conduct
+## 🔧 Development Setup
 
-- Be respectful and inclusive
-- Provide constructive feedback
-- Follow the established coding style
-- Report security issues responsibly
+### Prerequisites
+- **Node.js 18+** — [Download](https://nodejs.org/)
+- **Git** — [Download](https://git-scm.com/)
+- **VS Code** (recommended) with extensions:
+  - ESLint
+  - Prettier
+  - TypeScript Importer
 
-## Getting Started
-
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/yourusername/nyxen.git`
-3. Create a feature branch: `git checkout -b feature/your-feature`
-4. Make your changes
-5. Test your changes
-6. Commit with descriptive messages
-7. Push to your fork
-8. Create a Pull Request
-
-## Development Workflow
-
-### Frontend Development
+### First Time Setup
 
 ```bash
-cd frontend
+# Clone the repo
+git clone <repository-url>
+cd NYXen
+
+# Install dependencies
+npm run install:all
 npm install
+
+# Start development servers
 npm run dev
 ```
 
-### Backend Development
-
-```bash
-cd backend
-npm install
-cp .env.example .env
-# Update .env with your credentials
-npm run dev
-```
-
-## Code Style
+## 📝 Code Guidelines
 
 ### TypeScript
-- Use strict mode
-- Define types explicitly
-- Avoid `any` type
+- Use strict TypeScript — no `any` types unless absolutely necessary
+- Define interfaces for all data structures
+- Use enums for fixed value sets
 
-### JavaScript
-- Use ES6+ features
-- Use arrow functions
-- Use const/let, avoid var
+### CSS
+- All styles go in `frontend/src/index.css`
+- Use CSS custom properties (variables) from the design system
+- NO external CSS frameworks (no Tailwind, Bootstrap, etc.)
+- Follow the glass-morphism design language
 
-### CSS/Tailwind
-- Use Tailwind utility classes
-- Follow mobile-first approach
-- Use custom components for reuse
+### API Routes
+- RESTful naming conventions
+- All responses follow: `{ success: boolean, data?: any, error?: string }`
+- Proper HTTP status codes
+- JWT auth required for protected routes
 
-## Commit Messages
+### File Naming
+- Components: `PascalCase.tsx` (e.g., `GlassCard.tsx`)
+- Services: `camelCase.ts` (e.g., `imageAnalysisService.ts`)
+- Routes: `camelCase.ts` (e.g., `projects.ts`)
+- Styles: `kebab-case.css`
 
-Follow conventional commits:
-- `feat: Add new feature`
-- `fix: Fix bug`
-- `docs: Update documentation`
-- `style: Format code`
-- `refactor: Refactor code`
-- `test: Add tests`
+## 🔀 Git Workflow
 
-## Testing
-
-```bash
-# Frontend
-npm test
-
-# Backend
-npm test
+### Branch Naming
+```
+feature/short-description    # New features
+fix/issue-description        # Bug fixes
+docs/what-changed            # Documentation
+refactor/what-changed        # Code refactoring
 ```
 
-## Pull Request Process
+### Commit Messages
+Follow [Conventional Commits](https://www.conventionalcommits.org/):
+```
+feat: add GPS validation endpoint
+fix: correct MBook quantity calculation
+docs: update API documentation
+style: improve dashboard card layout
+refactor: extract measurement logic to service
+```
 
-1. Update README.md with changes
-2. Update documentation if needed
-3. Add tests for new features
-4. Ensure all tests pass
-5. Request review from maintainers
-6. Address review feedback
+### Pull Request Process
+1. Pull latest main: `git pull origin main`
+2. Create feature branch: `git checkout -b feature/my-feature`
+3. Make changes and test locally
+4. Commit with clear messages
+5. Push: `git push origin feature/my-feature`
+6. Create PR with description of changes
+7. Request review from at least one team member
 
-## Reporting Issues
+## 📁 Project Structure Guide
 
-- Use GitHub Issues
-- Provide detailed description
-- Include steps to reproduce
-- Provide expected vs actual behavior
-- Include environment information
+### Frontend (`frontend/src/`)
+| Directory | Purpose |
+|-----------|---------|
+| `components/` | Reusable UI components (cards, buttons, tables) |
+| `pages/` | Full page components (one per route) |
+| `layouts/` | Page layout wrappers (sidebar, header) |
+| `services/` | API communication layer |
+| `store/` | Global state management |
 
-## Security
+### Backend (`backend/src/`)
+| Directory | Purpose |
+|-----------|---------|
+| `config/` | Environment & database configuration |
+| `data/` | Mock data and seed files |
+| `middleware/` | Express middleware (auth, validation) |
+| `models/` | Data model interfaces and CRUD operations |
+| `routes/` | API route handlers |
+| `services/` | Business logic and AI processing |
 
-- Report security vulnerabilities via email: security@nyxen.ai
-- Do not disclose vulnerabilities publicly
-- Allow time for fix before disclosure
+## 🧪 Testing
 
-## License
+```bash
+# Run backend tests
+cd backend && npm test
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+# Run frontend build check
+cd frontend && npm run build
+
+# Full smoke test
+npm run dev  # Then manually verify all pages
+```
+
+## 🐛 Reporting Issues
+
+When reporting bugs, include:
+- Steps to reproduce
+- Expected behavior
+- Actual behavior
+- Browser/OS information
+- Console error logs (if any)
+
+## 💡 Feature Requests
+
+Open an issue with:
+- Clear description of the feature
+- Use case / motivation
+- Proposed implementation (optional)
 
 ---
 
-Thank you for contributing! 🚀
+Thank you for making MBook AI better! 🏗️

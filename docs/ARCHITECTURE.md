@@ -1,505 +1,169 @@
-# Nyxen Architecture Guide
+# Architecture Documentation — MBook AI
 
-## System Architecture
+## System Overview
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                           User Clients                               │
-│                         (Web, Mobile)                               │
-└──────────────────────────┬──────────────────────────────────────────┘
-                           │
-                    ┌──────▼──────┐
-                    │  CDN/Cache  │
-                    └──────┬──────┘
-                           │
-┌────────────────────────────▼──────────────────────────────────────┐
-│                     Firebase Hosting                               │
-│                    (Frontend Deployment)                           │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │              React + Vite Frontend (SPA)                │    │
-│  │  ┌──────────────────────────────────────────────────┐  │    │
-│  │  │  Components │ Pages │ Services │ Store │ Hooks  │  │    │
-│  │  └──────────────────────────────────────────────────┘  │    │
-│  │              Tailwind CSS + Framer Motion              │    │
-│  └─────────────────────────────────────────────────────────┘    │
-└────────────────────────────┬──────────────────────────────────────┘
-                           │
-            API Gateway / Load Balancer
-                           │
-┌────────────────────────────▼──────────────────────────────────────┐
-│                    Google Cloud Run / Kubernetes                   │
-│         ┌──────────────────────────────────────────────┐         │
-│         │         Express.js Backend (Node.js)         │         │
-│         │  ┌────────────────────────────────────────┐ │         │
-│         │  │  Routes │ Controllers │ Middleware     │ │         │
-│         │  │  ┌──────────────────────────────────┐ │ │         │
-│         │  │  │   REST API Endpoints             │ │ │         │
-│         │  │  │ /auth /dashboard /gemini         │ │ │         │
-│         │  │  │ /elastic /financial /identity    │ │ │         │
-│         │  │  └──────────────────────────────────┘ │ │         │
-│         │  └────────────────────────────────────────┘ │         │
-│         │  ┌────────────────────────────────────────┐ │         │
-│         │  │      Service Layer                      │ │         │
-│         │  │  ┌──────────────────────────────────┐ │ │         │
-│         │  │  │ • Gemini AI Service              │ │ │         │
-│         │  │  │ • Elastic Service                │ │ │         │
-│         │  │  │ • Auth Service                   │ │ │         │
-│         │  │  │ • Threat Detection Service       │ │ │         │
-│         │  │  │ • Behavior Analysis Service      │ │ │         │
-│         │  │  └──────────────────────────────────┘ │ │         │
-│         │  └────────────────────────────────────────┘ │         │
-│         └──────────────────────────────────────────────┘         │
-└────────────────────┬──────────────────────────────┬──────────────┘
-                     │                              │
-                     ▼                              ▼
-         ┌──────────────────────┐      ┌──────────────────────┐
-         │   Google Gemini API  │      │  Elastic Stack       │
-         │   (AI Analysis)      │      │  (Event Analytics)   │
-         │                      │      │                      │
-         │ • Threat Analysis    │      │ • Event Indexing     │
-         │ • Reasoning          │      │ • Anomaly Detection  │
-         │ • Explanations       │      │ • Correlation        │
-         │ • Recommendations    │      │ • Real-time Search   │
-         └──────────────────────┘      └──────────────────────┘
-                     │                              │
-                     └──────────────┬───────────────┘
-                                    ▼
-                     ┌──────────────────────────┐
-                     │     Data Layer           │
-                     │  ┌────────────────────┐ │
-                     │  │   MongoDB Atlas    │ │
-                     │  │                    │ │
-                     │  │ • Users            │ │
-                     │  │ • Threats          │ │
-                     │  │ • Transactions     │ │
-                     │  │ • Credentials      │ │
-                     │  │ • Login Attempts   │ │
-                     │  │ • Audit Logs       │ │
-                     │  └────────────────────┘ │
-                     └──────────────────────────┘
+MBook AI is a full-stack web application designed to automate and verify construction measurement books (MBooks) using AI-powered image analysis, GPS validation, and land registry cross-referencing.
+
+## Architecture Diagram
 
 ```
-
-## Component Hierarchy
-
-### Frontend Components
-
-```
-App
-├── LandingPage
-│   ├── HeroSection
-│   ├── FeaturesGrid
-│   ├── StatisticsSection
-│   └── CTASection
-├── Login
-│   ├── LoginForm
-│   └── SignupLink
-├── DashboardLayout
-│   ├── Sidebar
-│   │   ├── NavMenu
-│   │   └── UserProfile
-│   ├── Header
-│   │   ├── UserInfo
-│   │   └── NotificationBell
-│   └── MainContent
-│       ├── Dashboard
-│       │   ├── RiskScoreCards
-│       │   ├── ThreatFeed
-│       │   ├── AgentStatus
-│       │   └── QuickActions
-│       ├── ThreatAnalytics
-│       │   ├── ThreatTimeline
-│       │   ├── ThreatGrid
-│       │   └── Recommendations
-│       ├── FinancialIntelligence
-│       │   ├── SpendingChart
-│       │   ├── CategoryBreakdown
-│       │   └── Predictions
-│       ├── IdentityProtection
-│       │   ├── LoginAttempts
-│       │   ├── DeviceMonitoring
-│       │   └── CredentialStatus
-│       ├── SimulationLab
-│       │   ├── SimulationGrid
-│       │   └── SimulationResults
-│       ├── AIExplainability
-│       │   ├── ExplanationCards
-│       │   ├── ConfidenceBreakdown
-│       │   └── ReasoningChain
-│       └── Settings
-│           ├── AccountSettings
-│           ├── SecuritySettings
-│           ├── NotificationPrefs
-│           └── ConnectedServices
-
-UI Components (Reusable)
-├── GlassCard
-├── NeonButton
-├── RiskBadge
-├── StatCard
-├── LoadingSpinner
-├── Toast
-└── Charts (Recharts)
-    ├── LineChart
-    ├── AreaChart
-    ├── BarChart
-    └── PieChart
-```
-
-### Backend Services
-
-```
-Express Server
-├── Middleware Layer
-│   ├── Authentication (JWT)
-│   ├── Authorization (Role-based)
-│   ├── CORS
-│   ├── Compression
-│   ├── Helmet (Security)
-│   └── Error Handling
-├── Route Layer
-│   ├── /auth
-│   │   ├── POST /register
-│   │   ├── POST /login
-│   │   ├── GET /me
-│   │   └── POST /logout
-│   ├── /dashboard
-│   │   ├── GET /dashboard
-│   │   ├── GET /threats
-│   │   ├── GET /risk-scores
-│   │   └── GET /anomalies
-│   ├── /gemini
-│   │   ├── POST /analyze-threats
-│   │   ├── POST /explain/:threatId
-│   │   └── POST /recommendations/:threatId
-│   ├── /elastic
-│   │   ├── POST /search
-│   │   ├── GET /anomalies
-│   │   └── GET /correlations
-│   ├── /financial
-│   │   ├── GET /analysis
-│   │   ├── GET /spending
-│   │   └── GET /predictions
-│   ├── /identity
-│   │   ├── GET /login-attempts
-│   │   ├── GET /devices
-│   │   └── GET /credentials
-│   └── /simulate
-│       ├── POST /phishing
-│       ├── POST /account-takeover
-│       └── POST /financial-fraud
-├── Service Layer
-│   ├── AuthService
-│   │   ├── Register
-│   │   ├── Login
-│   │   └── Token Management
-│   ├── GeminiService
-│   │   ├── analyzeThreat()
-│   │   ├── explainThreat()
-│   │   ├── generateRecommendations()
-│   │   └── analyzeBehavioralPatterns()
-│   ├── ElasticService
-│   │   ├── logEvent()
-│   │   ├── detectAnomalies()
-│   │   ├── correlateEvents()
-│   │   └── searchThreats()
-│   ├── ThreatDetectionService
-│   │   ├── Phishing Detection
-│   │   ├── Fraud Detection
-│   │   ├── Account Takeover Detection
-│   │   └── Behavioral Analysis
-│   └── AnalyticsService
-│       ├── Calculate Risk Scores
-│       ├── Generate Insights
-│       └── Predictive Analysis
-├── Model Layer (MongoDB)
-│   ├── User
-│   ├── Threat
-│   ├── Transaction
-│   ├── LoginAttempt
-│   ├── Credential
-│   └── AuditLog
-└── Integration Layer
-    ├── Google Gemini API
-    ├── Elastic Stack
-    ├── Firebase Auth
-    ├── Google Cloud Logging
-    └── External APIs
+┌─────────────────────────────────────────────────────────────┐
+│                     CLIENT TIER                              │
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │              React + TypeScript + Vite                │   │
+│  │                                                       │   │
+│  │  ┌─────────┐  ┌──────────┐  ┌───────────────────┐   │   │
+│  │  │ Pages   │  │Components│  │    Services        │   │   │
+│  │  │         │  │          │  │                     │   │   │
+│  │  │Dashboard│  │GlassCard │  │ API Client          │   │   │
+│  │  │Analysis │  │GPSMap    │  │ Auth Token Mgmt     │   │   │
+│  │  │GPS      │  │MetricCard│  │                     │   │   │
+│  │  │Registry │  │Gauge     │  │                     │   │   │
+│  │  │MBook    │  │Table     │  │                     │   │   │
+│  │  │Audit    │  │Timeline  │  │                     │   │   │
+│  │  └─────────┘  └──────────┘  └───────────────────┘   │   │
+│  │                                                       │   │
+│  │  Libraries: Leaflet, Recharts, Framer Motion,         │   │
+│  │             Lucide Icons                               │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                           │                                  │
+└───────────────────────────┼──────────────────────────────────┘
+                            │ HTTP/REST (JSON)
+┌───────────────────────────┼──────────────────────────────────┐
+│                     APPLICATION TIER                          │
+│                           │                                   │
+│  ┌────────────────────────▼─────────────────────────────┐   │
+│  │              Express + TypeScript                     │   │
+│  │                                                       │   │
+│  │  ┌──────────┐   ┌──────────────────────────────┐     │   │
+│  │  │Middleware │   │         Routes                │     │   │
+│  │  │          │   │                                │     │   │
+│  │  │ JWT Auth │   │ /api/auth     → Auth           │     │   │
+│  │  │ CORS     │   │ /api/projects → Projects       │     │   │
+│  │  │ Morgan   │   │ /api/analysis → Image Analysis │     │   │
+│  │  │ Multer   │   │ /api/gps      → GPS Validation │     │   │
+│  │  │          │   │ /api/registry → Land Registry   │     │   │
+│  │  └──────────┘   │ /api/mbook    → MBook Gen      │     │   │
+│  │                  │ /api/audit    → Audit Reports   │     │   │
+│  │                  └──────────────────────────────┘     │   │
+│  │                                                       │   │
+│  │  ┌──────────────────────────────────────────────┐    │   │
+│  │  │              Services                         │    │   │
+│  │  │                                               │    │   │
+│  │  │  imageAnalysisService   - EXIF/GPS extraction │    │   │
+│  │  │                         - Dimension estimation │    │   │
+│  │  │                         - Element detection    │    │   │
+│  │  │                                               │    │   │
+│  │  │  geoLocationService     - Coordinate validation│    │   │
+│  │  │                         - Geofencing (Turf.js) │    │   │
+│  │  │                         - Spoofing detection   │    │   │
+│  │  │                                               │    │   │
+│  │  │  landRegistryService    - Survey number lookup │    │   │
+│  │  │                         - Boundary retrieval   │    │   │
+│  │  │                         - Encumbrance check    │    │   │
+│  │  │                                               │    │   │
+│  │  │  mbookService           - CPWD format entries  │    │   │
+│  │  │                         - Quantity calculation  │    │   │
+│  │  │                         - BOQ generation       │    │   │
+│  │  │                                               │    │   │
+│  │  │  auditService           - Compliance scoring   │    │   │
+│  │  │                         - Discrepancy detect   │    │   │
+│  │  │                         - Report generation    │    │   │
+│  │  └──────────────────────────────────────────────┘    │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                           │                                   │
+└───────────────────────────┼───────────────────────────────────┘
+                            │
+┌───────────────────────────┼───────────────────────────────────┐
+│                      DATA TIER                                 │
+│                           │                                    │
+│  ┌────────────────────────▼──────────────────────────────┐   │
+│  │              File-Based JSON Store                     │   │
+│  │                                                        │   │
+│  │  backend/data/store/                                   │   │
+│  │  ├── projects.json      - Project records              │   │
+│  │  ├── measurements.json  - Measurement entries          │   │
+│  │  └── audits.json        - Audit report history         │   │
+│  │                                                        │   │
+│  │  backend/data/                                         │   │
+│  │  ├── mockRegistry.ts    - Land registry mock data      │   │
+│  │  └── sampleProjects.ts  - Demo project data            │   │
+│  │                                                        │   │
+│  │  backend/uploads/       - Uploaded site images          │   │
+│  └────────────────────────────────────────────────────────┘   │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
 ```
 
 ## Data Flow
 
-### Threat Detection Flow
-
+### Image Analysis Flow
 ```
-User Action (Login)
-        │
-        ▼
-─────────────────────────────────────
-│ Capture Event (IP, Device, etc.)  │
-─────────────────────────────────────
-        │
-        ▼
-─────────────────────────────────────
-│ Log to Elastic                     │
-─────────────────────────────────────
-        │
-        ▼
-─────────────────────────────────────
-│ Anomaly Detection Engine           │
-│ (Compare to historical patterns)   │
-─────────────────────────────────────
-        │
-        ├─── Normal? ──→ Store & Monitor
-        │
-        └─── Anomalous?
-             │
-             ▼
-          ─────────────────────────────────────
-          │ Correlation Engine                 │
-          │ (Find related events)              │
-          ─────────────────────────────────────
-             │
-             ▼
-          ─────────────────────────────────────
-          │ Gemini AI Analysis                 │
-          │ (Understand threat)                │
-          ─────────────────────────────────────
-             │
-             ├─── Threat Detected
-             │    │
-             │    ▼
-             │ ─────────────────────────────────────
-             │ │ Create Threat Record             │
-             │ │ Store in MongoDB                 │
-             │ ─────────────────────────────────────
-             │    │
-             │    ▼
-             │ ─────────────────────────────────────
-             │ │ Generate Recommendations         │
-             │ │ (via Gemini)                     │
-             │ ─────────────────────────────────────
-             │    │
-             │    ▼
-             │ ─────────────────────────────────────
-             │ │ Send to Frontend                 │
-             │ │ Real-time Update (WebSocket)    │
-             │ ─────────────────────────────────────
-             │
-             └─── False Positive? ──→ Store & Learn
+1. User uploads image(s) via ImageUploader component
+2. Frontend sends POST /api/analysis/upload (multipart/form-data)
+3. Backend saves image to uploads/ directory
+4. imageAnalysisService extracts EXIF data (GPS, camera, timestamp)
+5. imageAnalysisService estimates dimensions using reference objects
+6. imageAnalysisService detects construction elements
+7. Results returned with confidence scores
+8. Frontend displays measurements, GPS data, and detected elements
 ```
 
-### Financial Analysis Flow
-
+### GPS Verification Flow
 ```
-Financial Transaction
-        │
-        ▼
-─────────────────────────────────────
-│ Store in MongoDB                   │
-│ (Transactions collection)          │
-─────────────────────────────────────
-        │
-        ▼
-─────────────────────────────────────
-│ Pattern Analysis                   │
-│ • Category breakdown               │
-│ • Spending trends                  │
-│ • Anomaly scoring                  │
-─────────────────────────────────────
-        │
-        ▼
-─────────────────────────────────────
-│ Gemini AI Analysis                 │
-│ • Predict balance                  │
-│ • Detect lifestyle creep           │
-│ • Identify forgotten subscriptions  │
-─────────────────────────────────────
-        │
-        ▼
-─────────────────────────────────────
-│ Generate Insights                  │
-│ • Budget recommendations           │
-│ • Spending alerts                  │
-│ • Savings predictions              │
-─────────────────────────────────────
-        │
-        ▼
-─────────────────────────────────────
-│ Frontend Display                   │
-│ • Charts & Statistics              │
-│ • AI Recommendations               │
-│ • Actionable Insights              │
-─────────────────────────────────────
+1. GPS coordinates extracted from image EXIF (or entered manually)
+2. Survey number provided for the authorized parcel
+3. landRegistryService retrieves parcel boundary polygon
+4. geoLocationService.validateCoordinates() checks point-in-polygon
+5. geoLocationService.detectSpoofing() checks metadata consistency
+6. Results: inside/outside parcel, distance to boundary, risk score
+7. Frontend displays on GPSMap with boundary overlay
 ```
 
-## Database Schema
-
-### MongoDB Collections
-
-```javascript
-// Users Collection
-{
-  _id: ObjectId,
-  email: String,
-  password: String (hashed),
-  firstName: String,
-  lastName: String,
-  plan: String, // free, pro, enterprise
-  riskScore: Number,
-  identityScore: Number,
-  financialRiskScore: Number,
-  lastLogin: Date,
-  settings: {
-    twoFactorEnabled: Boolean,
-    theme: String
-  },
-  createdAt: Date,
-  updatedAt: Date
-}
-
-// Threats Collection
-{
-  _id: ObjectId,
-  userId: ObjectId,
-  type: String, // phishing, fraud, etc.
-  severity: String,
-  description: String,
-  confidence: Number,
-  status: String, // detected, acknowledged, resolved
-  gemminiAnalysis: {
-    reasoning: String,
-    predictedImpact: String,
-    recommendedActions: [String]
-  },
-  correlatedThreats: [ObjectId],
-  evidence: {
-    ipAddresses: [String],
-    devices: [String],
-    locations: [String]
-  },
-  detectedAt: Date,
-  resolvedAt: Date
-}
-
-// Transactions Collection
-{
-  _id: ObjectId,
-  userId: ObjectId,
-  amount: Number,
-  category: String,
-  merchant: String,
-  anomalyScore: Number,
-  flagged: Boolean,
-  transactionDate: Date,
-  createdAt: Date
-}
-
-// Login Attempts Collection
-{
-  _id: ObjectId,
-  userId: ObjectId,
-  ipAddress: String,
-  deviceInfo: String,
-  geoLocation: {
-    country: String,
-    city: String,
-    latitude: Number,
-    longitude: Number
-  },
-  isAnomalous: Boolean,
-  anomalyScore: Number,
-  success: Boolean,
-  attemptAt: Date
-}
+### MBook Generation Flow
+```
+1. AI analysis produces measurement estimates
+2. User reviews/edits measurements in MeasurementTable
+3. mbookService formats entries in CPWD format
+4. Running account calculated across all visits
+5. Bill of Quantities cross-referenced
+6. MBook exported as JSON/CSV
 ```
 
-### Elastic Indices
-
+### Audit Report Flow
 ```
-nyxen-threats/
-├── _doc
-├── mappings
-│   ├── properties
-│   │   ├── userId: keyword
-│   │   ├── type: keyword
-│   │   ├── severity: keyword
-│   │   ├── confidence: integer
-│   │   ├── detectedAt: date
-│   │   ├── status: keyword
-│   │   └── data: object (dynamic)
-
-nyxen-events/
-├── _doc
-├── mappings
-│   ├── properties
-│   │   ├── userId: keyword
-│   │   ├── eventType: keyword
-│   │   ├── timestamp: date
-│   │   ├── data: object
-│   │   ├── metadata: object
-│   │   └── tags: keyword
-
-nyxen-anomalies/
-├── _doc
-├── mappings
-│   ├── properties
-│   │   ├── userId: keyword
-│   │   ├── anomalyType: keyword
-│   │   ├── score: float
-│   │   ├── detectedAt: date
-│   │   └── details: object
+1. auditService aggregates all verification data for project
+2. GPS validation score calculated
+3. Registry verification score calculated
+4. Measurement accuracy score calculated
+5. Discrepancies detected and findings generated
+6. Overall compliance score = weighted average
+7. Report generated with findings, scores, recommendations
 ```
 
-## Security Architecture
+## Security Model
 
-### Authentication Flow
+| Layer | Mechanism |
+|-------|-----------|
+| Authentication | JWT tokens (24-hour expiry) |
+| Authorization | Role-based (admin, engineer, auditor) |
+| Data Integrity | Image hash verification (planned) |
+| GPS Anti-Spoofing | Metadata consistency checks |
+| API Security | CORS, Helmet, rate limiting |
 
-```
-User Login
-    │
-    ▼
-─────────────────────────────────────
-│ Verify Credentials                 │
-│ (Email + Password Hash)            │
-─────────────────────────────────────
-    │
-    ├─── Invalid? ──→ Return 401
-    │
-    └─── Valid?
-         │
-         ▼
-      ─────────────────────────────────────
-      │ Generate JWT Token               │
-      │ (Header.Payload.Signature)       │
-      ─────────────────────────────────────
-         │
-         ▼
-      ─────────────────────────────────────
-      │ Return Token to Client           │
-      │ Store in localStorage            │
-      ─────────────────────────────────────
-         │
-         ▼
-      Future API Requests
-         │
-         ▼
-      ─────────────────────────────────────
-      │ Include Token in Authorization   │
-      │ Bearer <token>                   │
-      ─────────────────────────────────────
-         │
-         ▼
-      ─────────────────────────────────────
-      │ Verify Signature                 │
-      │ Check Expiration                 │
-      ─────────────────────────────────────
-         │
-         ├─── Invalid? ──→ Return 401
-         │
-         └─── Valid? ──→ Process Request
-```
+## Key Design Decisions
 
----
+1. **File-based JSON storage** instead of a database — simplifies deployment and eliminates external dependencies for the MVP
+2. **Mock land registry** — India lacks a unified public API; designed for easy swapping with real APIs
+3. **Server-side image processing** — Sharp + exifr on the server rather than browser-side OpenCV.js to reduce client bundle size
+4. **Turf.js for geospatial** — Proven library for point-in-polygon, distance calculations
+5. **CPWD format compliance** — Follows the standard Indian government measurement book format
+6. **ULPIN support** — Future-ready for India's Bhu-Aadhar land identification system
 
-**This architecture is production-ready and scalable!**
+## Future Enhancements
+
+- **Phase 2**: OpenCV/Python service for full Structure-from-Motion photogrammetry
+- **Phase 3**: Real land registry API integration (Bhoomi, Bhulekh, Meebhoomi)
+- **Phase 4**: Mobile app with offline-first capability
+- **Phase 5**: Blockchain audit trail for tamper-proof verification

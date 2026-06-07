@@ -1,52 +1,38 @@
-import dotenv from 'dotenv'
-
-dotenv.config()
-
 /**
  * Environment Configuration
- * Centralized configuration from environment variables
+ * Centralized environment variable management with sensible defaults.
  */
-export const config = {
-  // Server
-  nodeEnv: process.env.NODE_ENV || 'development',
-  port: parseInt(process.env.PORT || '5000'),
-  
-  // Database
-  mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/nyxen',
-  
-  // JWT
-  jwtSecret: process.env.JWT_SECRET || 'your-secret-key',
-  jwtExpire: process.env.JWT_EXPIRE || '7d',
-  
-  // Gemini
-  geminiApiKey: process.env.GEMINI_API_KEY,
-  geminiModel: process.env.GEMINI_MODEL || 'gemini-1.5-pro',
-  
-  // Elastic
-  elasticHost: process.env.ELASTIC_HOST || 'https://localhost:9200',
-  elasticUsername: process.env.ELASTIC_USERNAME || 'elastic',
-  elasticPassword: process.env.ELASTIC_PASSWORD || '',
-  elasticIndexPrefix: process.env.ELASTIC_INDEX_PREFIX || 'nyxen',
-  
-  // Firebase
-  firebaseProjectId: process.env.FIREBASE_PROJECT_ID,
-  firebasePrivateKey: process.env.FIREBASE_PRIVATE_KEY,
-  firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  
-  // Features
-  enableElasticLogging: process.env.ENABLE_ELASTIC_LOGGING === 'true',
-  enableGeminiAnalysis: process.env.ENABLE_GEMINI_ANALYSIS === 'true',
-  enableAutonomousResponse: process.env.ENABLE_AUTONOMOUS_RESPONSE === 'true',
-  
-  // Logging
-  logLevel: process.env.LOG_LEVEL || 'info',
-  logFormat: process.env.LOG_FORMAT || 'json',
-  
-  // CORS
-  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  
-  isDevelopment: process.env.NODE_ENV === 'development',
-  isProduction: process.env.NODE_ENV === 'production',
-}
 
-export default config
+export const ENV = {
+  /** Server port — defaults to 3001 */
+  PORT: parseInt(process.env.PORT || '3001', 10),
+
+  /** JWT secret for signing tokens */
+  JWT_SECRET: process.env.JWT_SECRET || 'mbook-ai-secret-key-2024-construction-audit',
+
+  /** JWT token expiry duration */
+  JWT_EXPIRY: process.env.JWT_EXPIRY || '24h',
+
+  /** Node environment */
+  NODE_ENV: process.env.NODE_ENV || 'development',
+
+  /** Upload directory for images */
+  UPLOAD_DIR: process.env.UPLOAD_DIR || 'uploads',
+
+  /** Data store directory for JSON file-based persistence */
+  DATA_STORE_DIR: process.env.DATA_STORE_DIR || 'data/store',
+
+  /** Maximum file upload size in bytes (50MB) */
+  MAX_UPLOAD_SIZE: parseInt(process.env.MAX_UPLOAD_SIZE || '52428800', 10),
+
+  /** CORS origin — frontend dev server */
+  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173',
+
+  /** Default GPS accuracy threshold in meters */
+  GPS_ACCURACY_THRESHOLD: parseFloat(process.env.GPS_ACCURACY_THRESHOLD || '50'),
+
+  /** Default geofence radius in kilometers for parcel boundary checks */
+  GEOFENCE_RADIUS_KM: parseFloat(process.env.GEOFENCE_RADIUS_KM || '0.5'),
+};
+
+export default ENV;

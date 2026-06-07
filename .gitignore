@@ -1,81 +1,40 @@
 # Dependencies
 node_modules/
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
-# Environment
-.env
-.env.local
-.env.*.local
+.pnp
+.pnp.js
 
 # Build outputs
 dist/
 build/
 *.tsbuildinfo
 
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Data store
+backend/data/store/
+backend/uploads/
+
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
-.DS_Store
-.project
-.settings/
-*.sublime-workspace
-
-# Testing
-coverage/
-.nyc_output/
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # OS
-Thumbs.db
 .DS_Store
+Thumbs.db
+desktop.ini
 
-# Cache
-.cache/
-.next/
-.nuxt/
-dist/
+# Logs
+*.log
+npm-debug.log*
 
-# Docker
-.dockerignore
-docker-compose.override.yml
+# Coverage
+coverage/
 
-# Misc
-.tmp/
-*.temp
-*.backup
-
-# Firebase
-.firebase/
-.firebaserc
-
-# Google Cloud
-.gcloud/
-credentials.json
-
-# Elastic
-.elasticsearch/
-
-# Database
-mongodb_data/
-elasticsearch_data/
-
-# Temp files
-temp/
+# Temp
 tmp/
-
-# Node modules cache
-.npm/
-
-# Vercel
-.vercel
+.temp/

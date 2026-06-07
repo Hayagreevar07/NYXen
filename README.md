@@ -1,368 +1,210 @@
-# Nyxen - AI-Powered Behavioral Intelligence & Protection Platform
+# 🏗️ MBook AI — Construction Verification & Auditing System
 
-**An autonomous cybersecurity and financial intelligence system powered by Google Gemini, Elastic, MongoDB, and Firebase Auth.**
+<div align="center">
 
-![Status](https://img.shields.io/badge/status-production--grade-green)
-![License](https://img.shields.io/badge/license-MIT-blue)
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+**AI-Powered Construction Measurement Book Verification, GPS Validation & Land Registry Cross-Referencing**
 
-## 🎯 Overview
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-18+-61DAFB?logo=react)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Nyxen is a full-stack AI platform that combines:
+</div>
 
-- **Autonomous Threat Detection**: Predicts and detects phishing, fraud, account takeovers, and behavioral anomalies
-- **Behavioral Intelligence**: Analyzes financial and identity patterns to identify risks before they escalate
-- **Autonomous Response Engine**: Automatically generates defensive actions and recommendations
-- **Explainable AI**: Gemini-powered explanations of detected threats and recommended actions
-- **Real-time Analytics**: Elastic-powered event correlation and anomaly detection
+---
 
-## 🏗️ Architecture
+## 🎯 Problem Statement
+
+Current construction measurement book (MBook) verification and auditing processes rely heavily on:
+- Manual site inspections and physical measurements
+- Paper-based recording and human validation
+- No instant verification of construction location vs. authorized land parcel
+- Inability to extract dimensions from standard site photographs
+
+**This results in:** delays, increased costs, measurement disputes, fraudulent reporting, location mismatches, and inefficient project monitoring.
+
+## 💡 Solution
+
+MBook AI is an intelligent platform that **autonomously**:
+
+| Feature | Description |
+|---------|-------------|
+| 📸 **Image Analysis** | Analyzes site photos using photogrammetry to extract physical dimensions and quantities |
+| 📍 **GPS Validation** | Validates GPS location data from image EXIF metadata against authorized parcels |
+| 🗺️ **Land Registry** | Cross-references survey numbers with official land registry records |
+| 📏 **MBook Generation** | Generates CPWD/PWD-compliant measurement book entries automatically |
+| 🛡️ **Audit Reports** | Produces compliance reports with confidence scores and discrepancy detection |
+
+## 🏛️ Architecture
 
 ```
-Nyxen/
-├── frontend/                    # React + Vite frontend
-│   ├── src/
-│   │   ├── components/         # Reusable UI components
-│   │   ├── pages/              # Main application pages
-│   │   ├── services/           # API client
-│   │   ├── store/              # Zustand state management
-│   │   ├── styles/             # Global styles
-│   │   └── utils/              # Helper functions
-│   ├── index.html
-│   ├── vite.config.ts
-│   ├── tailwind.config.js
-│   └── package.json
-│
-├── backend/                     # Node.js + Express backend
-│   ├── src/
-│   │   ├── config/             # Database, Elastic, env
-│   │   ├── models/             # MongoDB schemas
-│   │   ├── routes/             # API endpoints
-│   │   ├── services/           # Gemini, Elastic services
-│   │   ├── middleware/         # Auth, CORS, error handling
-│   │   ├── utils/              # Logger, JWT utilities
-│   │   ├── app.ts              # Express app setup
-│   │   └── index.ts            # Server entry point
-│   ├── tsconfig.json
-│   └── package.json
-│
-└── docs/                        # Documentation
-    ├── API.md                   # API documentation
-    ├── SETUP.md                 # Setup instructions
-    └── DEPLOYMENT.md            # Deployment guide
+┌─────────────────────────────────────────────────────┐
+│              Frontend (React + Vite + TS)            │
+│  Landing → Dashboard → Analysis → GPS → Registry    │
+│           → MBook Generator → Audit Reports          │
+└──────────────────────┬──────────────────────────────┘
+                       │ REST API
+┌──────────────────────▼──────────────────────────────┐
+│            Backend (Express + TypeScript)             │
+│  Image Analysis │ GPS Validation │ Land Registry     │
+│  MBook Service  │ Audit Engine   │ Auth (JWT)        │
+└──────────────────────┬──────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────┐
+│              Data Layer (JSON File Store)             │
+│  Projects │ Measurements │ Registry │ Audit Logs     │
+└─────────────────────────────────────────────────────┘
 ```
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18 + TypeScript + Vite |
+| Styling | Vanilla CSS (Dark Glassmorphism) |
+| Maps | Leaflet + OpenStreetMap |
+| Charts | Recharts |
+| Animations | Framer Motion |
+| Backend | Express + TypeScript |
+| Image Processing | Sharp + exifr |
+| Geospatial | Turf.js |
+| Auth | JWT + bcryptjs |
+| Data Store | File-based JSON |
 
 ## 🚀 Quick Start
 
 ### Prerequisites
+- Node.js 18+ installed
+- npm or yarn
 
-- Node.js 18+
-- MongoDB 5+
-- Google Gemini API Key
-- Elastic instance
-- Firebase project
-- MongoDB Atlas account or local MongoDB
-- Vercel or Render account for deployment
-
-### 1. Frontend Setup
+### Installation
 
 ```bash
-cd frontend
+# Clone the repository
+git clone <repository-url>
+cd NYXen
+
+# Install all dependencies
+npm run install:all
+
+# Install root dependencies
 npm install
+```
+
+### Development
+
+```bash
+# Start both frontend and backend
 npm run dev
+
+# Or start separately:
+npm run dev:backend    # Express server on http://localhost:3001
+npm run dev:frontend   # Vite dev server on http://localhost:5173
 ```
 
-Navigate to `http://localhost:3000`
+### Demo Credentials
 
-### 2. Backend Setup
+| Role | Username | Password |
+|------|----------|----------|
+| Admin | admin | admin123 |
+| Engineer | engineer | eng123 |
+| Auditor | auditor | audit123 |
 
-```bash
-cd backend
-npm install
-cp .env.example .env
-# Update .env with your credentials
-npm run dev
+## 📋 Features in Detail
+
+### 📸 AI Image Analysis
+- Upload construction site photos
+- Automatic EXIF/GPS data extraction
+- AI-powered dimension estimation using reference objects
+- Construction element detection (walls, columns, beams, slabs)
+- Confidence scores for each measurement
+
+### 📍 GPS Verification
+- Extract GPS coordinates from image metadata
+- Geofencing validation against authorized parcel boundaries
+- GPS spoofing detection
+- Distance-to-boundary calculation
+- Interactive map visualization
+
+### 🗺️ Land Registry Cross-Reference
+- Survey number lookup and validation
+- Support for multiple state formats (Maharashtra 7/12, Karnataka RTC, UP Khatauni)
+- Parcel boundary visualization on map
+- Ownership verification
+- Encumbrance and dispute checking
+- ULPIN (Bhu-Aadhar) support
+
+### 📏 MBook Generator
+- CPWD/PWD-compliant measurement entries
+- Automatic quantity calculation (L × B × H)
+- CPWD DSR item code mapping
+- Running account management
+- Bill of Quantities generation
+- Export to JSON/CSV
+
+### 🛡️ Audit Reports
+- 0-100 compliance scoring
+- GPS validation score
+- Registry verification score
+- Measurement accuracy analysis
+- Discrepancy detection
+- Fraud indicator flagging
+- Detailed findings and recommendations
+
+## 📁 Project Structure
+
 ```
-
-Backend runs on `http://localhost:5000`
-
-### 3. Environment Configuration
-
-**Frontend** (`.env`):
-```env
-VITE_API_URL=http://localhost:5000/api
-VITE_FIREBASE_API_KEY=your_key
+NYXen/
+├── frontend/                 # React + Vite frontend
+│   ├── src/
+│   │   ├── components/       # Reusable UI components
+│   │   ├── pages/            # Page components
+│   │   ├── layouts/          # Layout wrappers
+│   │   ├── services/         # API service layer
+│   │   ├── store/            # State management
+│   │   └── index.css         # Design system
+│   └── index.html
+├── backend/                  # Express + TypeScript backend
+│   ├── src/
+│   │   ├── config/           # Configuration
+│   │   ├── data/             # Mock data & registries
+│   │   ├── middleware/       # Auth & validation
+│   │   ├── models/           # Data models
+│   │   ├── routes/           # API routes
+│   │   └── services/         # Business logic
+│   └── package.json
+├── docs/                     # Documentation
+├── package.json              # Root monorepo config
+└── README.md
 ```
-
-**Backend** (`.env`):
-```env
-NODE_ENV=development
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/nyxen
-GEMINI_API_KEY=your_gemini_key
-ELASTIC_HOST=https://localhost:9200
-ELASTIC_PASSWORD=your_password
-```
-
-## 📊 Key Features
-
-### 1. **Real-time Security Dashboard**
-- Live threat detection feed
-- Risk scores (overall, identity, financial)
-- Autonomous agent status monitoring
-- Active alerts and anomalies
-
-### 2. **Threat Analytics**
-- 24-hour threat timeline visualization
-- Threat type distribution
-- Event correlations
-- AI-powered recommendations
-
-### 3. **Financial Intelligence**
-- Spending pattern analysis
-- Subscription leak detection
-- Lifestyle creep monitoring
-- End-of-month balance predictions
-
-### 4. **Identity Protection**
-- Suspicious login detection
-- Device behavior monitoring
-- Credential exposure tracking
-- Cross-platform anomaly detection
-
-### 5. **AI Simulation Lab**
-- Test phishing attack scenarios
-- Simulate account takeover attempts
-- Financial fraud testing
-- Social engineering simulations
-
-### 6. **AI Explainability**
-- Understand threat detection reasoning
-- Confidence score breakdown
-- Impact predictions
-- Detailed AI analysis
-
-## 🔌 Autonomous Agents
-
-Nyxen runs 6 autonomous agents:
-
-1. **Financial Intelligence Agent**
-   - Analyzes spending patterns
-   - Detects lifestyle creep
-   - Predicts balance and fraud risks
-
-2. **Threat Correlation Agent**
-   - Correlates events across platforms
-   - Identifies attack patterns
-   - Detects behavioral drift
-
-3. **Identity Protection Agent**
-   - Monitors login attempts
-   - Tracks device behavior
-   - Detects impersonation
-
-4. **Behavioral Drift Agent**
-   - Analyzes anomalies
-   - Predicts future risks
-   - Generates risk scores
-
-5. **Autonomous Response Engine**
-   - Recommends protective actions
-   - Suggests MFA enablement
-   - Simulates threat mitigation
-
-6. **Explainability Agent**
-   - Generates AI reasoning
-   - Explains threat detection
-   - Breaks down confidence levels
-
-## 🧠 Gemini AI Integration
-
-Nyxen uses Google Gemini API for:
-
-- **Threat Analysis**: Analyze security events and generate insights
-- **Explainability**: Explain why threats were detected
-- **Recommendations**: Generate actionable defensive recommendations
-- **Behavioral Analysis**: Understand user behavior patterns
-
-## 📊 Elastic Stack Integration
-
-Nyxen uses Elastic for:
-
-- **Event Logging**: Log all security events
-- **Anomaly Detection**: Detect behavioral anomalies
-- **Correlation**: Find event relationships
-- **Real-time Analytics**: Dashboard data
-- **Threat Indexing**: Fast threat searching
-
-## 🔐 Security Features
-
-- **JWT Authentication**: Secure token-based auth
-- **Firebase Integration**: Optional enterprise auth
-- **Password Hashing**: bcryptjs with salts
-- **HTTPS Ready**: Helmet security headers
-- **Rate Limiting**: Coming soon
-- **Audit Logging**: All actions logged
-
-## 📱 Tech Stack
-
-### Frontend
-- React 18
-- Vite
-- TypeScript
-- Tailwind CSS
-- Framer Motion
-- Recharts
-- Lucide Icons
-
-### Backend
-- Express.js
-- Node.js
-- MongoDB
-- JWT
-- Google Gemini API
-- Elastic Stack
-
-### Infrastructure
-- Render / Vercel / Docker
-- Firebase
-- Elastic Cloud
-- MongoDB Atlas
-
-## 📚 API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/me` - Get current user
-- `POST /api/auth/logout` - Logout
-
-### Dashboard
-- `GET /api/dashboard` - Get dashboard data
-- `GET /api/threats` - List threats
-- `GET /api/risk-scores` - Get risk scores
-- `GET /api/anomalies` - Get anomalies
-
-### Gemini AI
-- `POST /api/gemini/analyze-threats` - Analyze threats
-- `POST /api/gemini/explain/:threatId` - Explain threat
-- `POST /api/gemini/recommendations/:threatId` - Get recommendations
-
-### Elastic
-- `POST /api/elastic/search` - Search events
-- `GET /api/elastic/anomalies` - Get anomalies
-- `GET /api/elastic/correlations` - Get correlations
-
-### Financial
-- `GET /api/financial/analysis` - Get analysis
-- `GET /api/financial/spending` - Get spending data
-- `GET /api/financial/predictions` - Get predictions
-
-### Identity
-- `GET /api/identity/login-attempts` - Get login attempts
-- `GET /api/identity/devices` - Get devices
-- `GET /api/identity/credentials` - Get credentials
-
-### Simulation
-- `POST /api/simulate/phishing` - Simulate phishing
-- `POST /api/simulate/account-takeover` - Simulate takeover
-- `POST /api/simulate/financial-fraud` - Simulate fraud
-
-## 🎨 UI/UX Design
-
-- **Cybersecurity Theme**: Neon colors, glassmorphism
-- **Dark Mode**: Optimized for 24/7 monitoring
-- **Real-time Visualizations**: Animated threat feeds
-- **Responsive Design**: Mobile-friendly layouts
-- **Smooth Animations**: Framer Motion interactions
-
-### Color Palette
-- Primary Neon Cyan: `#00d9ff`
-- Secondary Purple: `#a855f7`
-- Accent Pink: `#ec4899`
-- Success Green: `#00ff41`
-
-## 🚀 Deployment
-
-### Free Deployment
-
-```bash
-# Backend: Render (free tier)
-# 1. Push the repo to GitHub
-# 2. Create a new Web Service on Render
-# 3. Root directory: backend
-# 4. Build command: npm ci && npm run build
-# 5. Start command: npm start
-
-# Frontend: Vercel (free tier)
-# 1. Import the repo into Vercel
-# 2. Root directory: frontend
-# 3. Set VITE_API_URL to your Render backend URL
-# 4. Deploy
-```
-
-### Frontend (Vercel)
-
-```bash
-# Build
-npm run build
-
-# Deploy
-vercel deploy dist
-```
-
-## 📈 Monitoring
-
-- Application metrics via Elastic
-- Platform logging via Render, Vercel, or Docker
-- Performance monitoring
-- Error tracking
-
-## 🧪 Testing
-
-```bash
-# Frontend
-npm test
-
-# Backend
-npm test
-```
-
-## 📝 Documentation
-
-- [API Documentation](./docs/API.md)
-- [Setup Guide](./docs/SETUP.md)
-- [Deployment Guide](./docs/DEPLOYMENT.md)
-- [Architecture Guide](./docs/ARCHITECTURE.md)
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
-5. Open Pull Request
+1. Pull the latest changes: `git pull origin main`
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Make your changes
+4. Commit with meaningful messages: `git commit -m "feat: add GPS validation"`
+5. Push your branch: `git push origin feature/your-feature`
+6. Create a Pull Request
+
+### Commit Convention
+- `feat:` — New feature
+- `fix:` — Bug fix
+- `docs:` — Documentation
+- `style:` — Styling changes
+- `refactor:` — Code refactoring
+- `test:` — Tests
 
 ## 📄 License
 
-MIT License - see LICENSE file for details
+MIT License — see [LICENSE](LICENSE) for details.
 
-## 🔗 Links
+## 👥 Team
 
-- **Live Demo**: https://nyxen.ai (coming soon)
-- **GitHub**: https://github.com/yourusername/nyxen
-- **Documentation**: https://docs.nyxen.ai
-
-## 💬 Support
-
-- GitHub Issues: Report bugs and feature requests
-- Discussions: Ask questions and share ideas
-- Email: support@nyxen.ai
-
-## ⚠️ Security Notice
-
-Nyxen is a security platform. Always follow responsible disclosure practices and obtain proper authorization before testing security features on production systems.
+Built by the **NYXen Team** 🚀
 
 ---
 
-**Built with ❤️ for secure AI automation**
+<div align="center">
+<strong>MBook AI</strong> — Bringing transparency and accuracy to construction verification
+</div>

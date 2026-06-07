@@ -1,503 +1,356 @@
-# Nyxen API Documentation
+# API Reference — MBook AI
 
-## Base URL
+Base URL: `http://localhost:3001/api`
 
-```
-http://localhost:5000/api
-```
+All protected endpoints require `Authorization: Bearer <token>` header.
+
+---
 
 ## Authentication
 
-All protected endpoints require a Bearer token in the Authorization header:
+### POST /api/auth/login
+Login and receive JWT token.
 
-```
-Authorization: Bearer YOUR_JWT_TOKEN
-```
-
-## Response Format
-
-All responses are in JSON format:
-
+**Request:**
 ```json
 {
-  "data": {},
-  "error": null,
-  "timestamp": "2024-05-28T10:30:00Z"
+  "username": "engineer",
+  "password": "eng123"
 }
 ```
 
-## Error Codes
-
-- `200` - Success
-- `201` - Created
-- `400` - Bad Request
-- `401` - Unauthorized
-- `403` - Forbidden
-- `404` - Not Found
-- `500` - Server Error
-
----
-
-## Authentication Endpoints
-
-### Register User
-
-```http
-POST /auth/register
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "SecurePassword123!",
-  "firstName": "John",
-  "lastName": "Doe"
-}
-```
-
-**Response:**
+**Response (200):**
 ```json
 {
-  "user": {
-    "_id": "user_id",
-    "email": "user@example.com",
-    "firstName": "John",
-    "lastName": "Doe",
-    "plan": "free",
-    "riskScore": 0,
-    "createdAt": "2024-05-28T10:30:00Z"
-  },
-  "token": "eyJhbGc..."
-}
-```
-
-### Login
-
-```http
-POST /auth/login
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "SecurePassword123!"
-}
-```
-
-**Response:** Same as register
-
-### Get Current User
-
-```http
-GET /auth/me
-Authorization: Bearer YOUR_TOKEN
-```
-
-**Response:**
-```json
-{
-  "_id": "user_id",
-  "email": "user@example.com",
-  "plan": "pro",
-  "riskScore": 25,
-  "lastLogin": "2024-05-28T10:30:00Z"
-}
-```
-
-### Logout
-
-```http
-POST /auth/logout
-Authorization: Bearer YOUR_TOKEN
-```
-
----
-
-## Dashboard Endpoints
-
-### Get Dashboard Data
-
-```http
-GET /dashboard
-Authorization: Bearer YOUR_TOKEN
-```
-
-**Response:**
-```json
-{
-  "user": { ... },
-  "risks": {
-    "overall": 25,
-    "identity": 78,
-    "financial": 42
-  },
-  "threats": [
-    {
-      "id": "threat_id",
-      "type": "phishing",
-      "severity": "high",
-      "description": "Suspicious email detected",
-      "confidence": 94,
-      "status": "detected"
+  "success": true,
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIs...",
+    "user": {
+      "id": "user-002",
+      "username": "engineer",
+      "role": "engineer",
+      "name": "Rajesh Kumar"
     }
-  ],
-  "elastic": { ... }
+  }
 }
 ```
 
-### Get Threats
+### POST /api/auth/register
+Register new user. (Admin only)
 
-```http
-GET /threats?type=phishing&severity=high&status=detected
-Authorization: Bearer YOUR_TOKEN
-```
-
-**Query Parameters:**
-- `type` - Threat type (optional)
-- `severity` - critical, high, medium, low
-- `status` - detected, acknowledged, resolved
-
-**Response:**
-```json
-[
-  {
-    "_id": "threat_id",
-    "type": "phishing",
-    "severity": "high",
-    "description": "...",
-    "confidence": 94,
-    "detectedAt": "2024-05-28T10:30:00Z"
-  }
-]
-```
-
-### Get Risk Scores
-
-```http
-GET /risk-scores
-Authorization: Bearer YOUR_TOKEN
-```
-
-**Response:**
-```json
-{
-  "overall": 25,
-  "identity": 78,
-  "financial": 42,
-  "lastUpdated": "2024-05-28T10:30:00Z"
-}
-```
-
-### Get Anomalies
-
-```http
-GET /anomalies
-Authorization: Bearer YOUR_TOKEN
-```
-
-**Response:**
-```json
-[
-  {
-    "id": "anom_1",
-    "type": "login",
-    "score": 78,
-    "description": "Unusual login location",
-    "timestamp": "2024-05-28T10:30:00Z"
-  }
-]
-```
+### GET /api/auth/profile 🔒
+Get current user profile.
 
 ---
 
-## Gemini AI Endpoints
+## Projects
 
-### Analyze Threats
+### GET /api/projects 🔒
+List all projects.
 
-```http
-POST /gemini/analyze-threats
-Authorization: Bearer YOUR_TOKEN
-Content-Type: application/json
-
+**Response (200):**
+```json
 {
-  "threats": [
+  "success": true,
+  "data": [
     {
-      "type": "phishing",
-      "description": "Suspicious email from unknown sender",
-      "context": {
-        "sender": "attacker@evil.com",
-        "subject": "Urgent action required"
-      }
+      "id": "proj-001",
+      "name": "Residential Complex Block A",
+      "surveyNumber": "123/1A",
+      "location": { "lat": 12.9716, "lng": 77.5946, "address": "Bangalore, Karnataka" },
+      "status": "in-progress",
+      "totalBudget": 15000000,
+      "startDate": "2026-01-15"
     }
   ]
 }
 ```
 
-**Response:**
+### POST /api/projects 🔒
+Create new project.
+
+### GET /api/projects/:id 🔒
+Get project details with measurements.
+
+### PUT /api/projects/:id 🔒
+Update project.
+
+---
+
+## Image Analysis
+
+### POST /api/analysis/upload 🔒
+Upload site images for analysis.
+
+**Request:** `multipart/form-data` with `images` field (max 10 files, 50MB each)
+
+**Response (200):**
 ```json
-[
-  {
-    "type": "phishing",
-    "confidence": 94,
-    "reasoning": "Multiple phishing indicators detected",
-    "predictedImpact": "High risk of credential compromise",
-    "recommendedActions": [
-      "Mark as spam",
-      "Report to security team",
-      "Enable MFA"
+{
+  "success": true,
+  "data": {
+    "uploadId": "upload-abc123",
+    "files": [
+      {
+        "filename": "site_photo_001.jpg",
+        "size": 4520000,
+        "path": "/uploads/upload-abc123/site_photo_001.jpg"
+      }
     ]
   }
-]
+}
 ```
 
-### Explain Threat
+### POST /api/analysis/process 🔒
+Process uploaded images with AI analysis.
 
-```http
-POST /gemini/explain/:threatId
-Authorization: Bearer YOUR_TOKEN
-Content-Type: application/json
-
+**Request:**
+```json
 {
-  "threatDetails": {
-    "type": "phishing",
-    "ipAddress": "1.2.3.4",
-    "location": "Unknown location",
-    "confidence": 94
+  "uploadId": "upload-abc123",
+  "projectId": "proj-001",
+  "referenceWidthCm": 30
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "analysisId": "analysis-xyz789",
+    "gpsData": {
+      "lat": 12.9716,
+      "lng": 77.5946,
+      "altitude": 920,
+      "accuracy": 3.5,
+      "timestamp": "2026-06-07T10:30:00+05:30"
+    },
+    "detectedElements": [
+      {
+        "type": "column",
+        "confidence": 0.87,
+        "dimensions": { "width": 0.45, "height": 3.2 },
+        "boundingBox": { "x": 120, "y": 50, "width": 80, "height": 300 }
+      }
+    ],
+    "measurements": [
+      {
+        "description": "RCC Column 300x450mm",
+        "category": "concrete",
+        "length": 0.3,
+        "breadth": 0.45,
+        "depth": 3.2,
+        "quantity": 0.432,
+        "unit": "Cum",
+        "confidenceScore": 87
+      }
+    ],
+    "overallConfidence": 82
   }
 }
 ```
 
-**Response:**
-```json
-{
-  "explanation": "This threat was detected because... [detailed explanation in plain English]"
-}
-```
-
-### Generate Recommendations
-
-```http
-POST /gemini/recommendations/:threatId
-Authorization: Bearer YOUR_TOKEN
-Content-Type: application/json
-
-{
-  "threatType": "account_takeover"
-}
-```
-
-**Response:**
-```json
-[
-  {
-    "action": "Enable two-factor authentication",
-    "priority": "critical",
-    "timeframe": "Immediately",
-    "details": "Go to Settings > Security > 2FA"
-  },
-  {
-    "action": "Review recent login activity",
-    "priority": "high",
-    "timeframe": "Within 1 hour",
-    "details": "Check for unauthorized access attempts"
-  }
-]
-```
+### GET /api/analysis/:id 🔒
+Get analysis results.
 
 ---
 
-## Elastic Endpoints
+## GPS Validation
 
-### Search Events
+### POST /api/gps/validate 🔒
+Validate GPS coordinates against an authorized parcel.
 
-```http
-POST /elastic/search
-Authorization: Bearer YOUR_TOKEN
-Content-Type: application/json
-
+**Request:**
+```json
 {
-  "query": "phishing attack last week"
+  "lat": 12.9716,
+  "lng": 77.5946,
+  "surveyNumber": "123/1A"
 }
 ```
 
-### Get Anomalies
-
-```http
-GET /elastic/anomalies
-Authorization: Bearer YOUR_TOKEN
-```
-
-### Get Event Correlations
-
-```http
-GET /elastic/correlations
-Authorization: Bearer YOUR_TOKEN
-```
-
----
-
-## Financial Endpoints
-
-### Get Financial Analysis
-
-```http
-GET /financial/analysis?period=30d
-Authorization: Bearer YOUR_TOKEN
-```
-
-**Response:**
+**Response (200):**
 ```json
 {
-  "totalSpending": 5200,
-  "avgTransaction": 185,
-  "transactionCount": 28,
-  "period": "30d"
-}
-```
-
-### Get Spending Patterns
-
-```http
-GET /financial/spending
-Authorization: Bearer YOUR_TOKEN
-```
-
-**Response:**
-```json
-{
-  "byCategory": {
-    "groceries": 620,
-    "dining": 480,
-    "shopping": 890,
-    "subscriptions": 285
-  },
-  "transactions": [...]
-}
-```
-
-### Get Predictions
-
-```http
-GET /financial/predictions
-Authorization: Bearer YOUR_TOKEN
-```
-
-**Response:**
-```json
-{
-  "predictedMonthlySpending": 5200,
-  "savingsGoalRisk": "medium",
-  "predictedBalance": 3450,
-  "recommendations": [...]
-}
-```
-
----
-
-## Identity Protection Endpoints
-
-### Get Login Attempts
-
-```http
-GET /identity/login-attempts
-Authorization: Bearer YOUR_TOKEN
-```
-
-**Response:**
-```json
-[
-  {
-    "location": "New York, USA",
-    "device": "Chrome on Windows",
-    "time": "2 hours ago",
-    "status": "verified"
-  }
-]
-```
-
-### Get Connected Devices
-
-```http
-GET /identity/devices
-Authorization: Bearer YOUR_TOKEN
-```
-
-### Get Credential Status
-
-```http
-GET /identity/credentials
-Authorization: Bearer YOUR_TOKEN
-```
-
----
-
-## Simulation Endpoints
-
-### Simulate Phishing Attack
-
-```http
-POST /simulate/phishing
-Authorization: Bearer YOUR_TOKEN
-Content-Type: application/json
-
-{
-  "config": {
-    "complexity": "medium",
-    "target": "email"
+  "success": true,
+  "data": {
+    "isWithinParcel": true,
+    "distanceToBoundary": 45.2,
+    "distanceUnit": "meters",
+    "spoofingRisk": "low",
+    "spoofingScore": 15,
+    "parcelDetails": {
+      "surveyNumber": "123/1A",
+      "village": "Koramangala",
+      "district": "Bangalore Urban"
+    },
+    "validationTimestamp": "2026-06-07T10:30:00Z"
   }
 }
 ```
 
-**Response:**
+### POST /api/gps/extract 🔒
+Extract GPS from uploaded image.
+
+### GET /api/gps/geofence/:surveyNo 🔒
+Get geofence boundary for a survey number.
+
+---
+
+## Land Registry
+
+### GET /api/registry/verify/:surveyNo 🔒
+Verify a survey number exists in the registry.
+
+**Response (200):**
 ```json
 {
-  "id": "sim_123",
-  "type": "phishing",
-  "status": "completed",
-  "threatDetected": true,
-  "detectionTime": 250,
-  "confidence": 98,
-  "reasoning": "Email matched known phishing patterns"
+  "success": true,
+  "data": {
+    "exists": true,
+    "surveyNumber": "123/1A",
+    "state": "Karnataka",
+    "district": "Bangalore Urban",
+    "taluk": "Bangalore South",
+    "village": "Koramangala",
+    "ownerName": "Ramesh Sharma",
+    "area": 0.45,
+    "areaUnit": "hectares",
+    "landUse": "residential",
+    "encumbrances": [],
+    "ulpin": "KA12BU004501",
+    "registrationDate": "2018-03-15",
+    "boundary": [[12.9710, 77.5940], [12.9720, 77.5940], ...]
+  }
 }
 ```
 
-### Simulate Account Takeover
+### GET /api/registry/parcel/:surveyNo 🔒
+Get parcel boundary polygon for map display.
 
-```http
-POST /simulate/account-takeover
-Authorization: Bearer YOUR_TOKEN
-Content-Type: application/json
-
-{
-  "config": { ... }
-}
-```
-
-### Simulate Financial Fraud
-
-```http
-POST /simulate/financial-fraud
-Authorization: Bearer YOUR_TOKEN
-Content-Type: application/json
-
-{
-  "config": { ... }
-}
-```
+### POST /api/registry/cross-reference 🔒
+Cross-reference survey number with GPS coordinates.
 
 ---
 
-## Rate Limiting
+## MBook
 
-Coming in v1.1:
-- 100 requests per minute for authenticated users
-- 10 requests per minute for unauthenticated endpoints
+### POST /api/mbook/generate 🔒
+Generate MBook entries from analysis results.
 
-## Webhooks
+**Request:**
+```json
+{
+  "projectId": "proj-001",
+  "analysisId": "analysis-xyz789"
+}
+```
 
-Coming in v1.2:
-- Threat detection events
-- Risk score changes
-- Agent activity updates
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "mbookId": "mbook-001",
+    "projectId": "proj-001",
+    "entries": [
+      {
+        "serialNo": 1,
+        "itemCode": "4.1.1",
+        "description": "Providing and laying RCC M25 grade in columns",
+        "unit": "Cum",
+        "measurements": [
+          {
+            "description": "Column C1, Ground Floor",
+            "number": 4,
+            "length": 0.3,
+            "breadth": 0.45,
+            "depth": 3.2,
+            "quantity": 1.728
+          }
+        ],
+        "totalQuantity": 1.728,
+        "rate": 8500,
+        "amount": 14688
+      }
+    ],
+    "summary": {
+      "totalItems": 1,
+      "totalAmount": 14688,
+      "currency": "INR"
+    }
+  }
+}
+```
+
+### GET /api/mbook/:projectId 🔒
+Get MBook for project.
+
+### GET /api/mbook/:projectId/export?format=csv 🔒
+Export MBook.
 
 ---
 
-**Last Updated:** 2024-05-28
+## Audit
+
+### POST /api/audit/report 🔒
+Generate comprehensive audit report.
+
+**Request:**
+```json
+{
+  "projectId": "proj-001"
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "reportId": "audit-001",
+    "projectId": "proj-001",
+    "overallScore": 85,
+    "gpsValidation": { "status": "pass", "score": 92, "details": "GPS within authorized parcel" },
+    "registryVerification": { "status": "pass", "score": 88, "details": "Survey number verified" },
+    "measurementAccuracy": { "status": "warning", "score": 75, "details": "2 measurements below confidence threshold" },
+    "findings": [
+      {
+        "severity": "warning",
+        "title": "Low Confidence Measurement",
+        "description": "Earthwork measurement has 62% confidence score",
+        "recommendation": "Re-measure with physical verification"
+      }
+    ],
+    "recommendations": [
+      "Schedule physical site inspection for earthwork verification",
+      "Update reference markers for improved AI accuracy"
+    ],
+    "generatedAt": "2026-06-07T10:30:00Z"
+  }
+}
+```
+
+### GET /api/audit/:projectId 🔒
+Get audit history for project.
+
+---
+
+## Error Responses
+
+All errors follow this format:
+```json
+{
+  "success": false,
+  "error": "Description of the error"
+}
+```
+
+| Status Code | Meaning |
+|-------------|---------|
+| 400 | Bad Request — Invalid input |
+| 401 | Unauthorized — Missing or invalid token |
+| 403 | Forbidden — Insufficient permissions |
+| 404 | Not Found — Resource doesn't exist |
+| 500 | Server Error — Internal error |

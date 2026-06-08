@@ -128,18 +128,12 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
-  const login = async (_username: string, _password: string) => {
-    // Mock login — in production this would call the API
-    const mockUser: User = {
-      id: '1',
-      name: 'Rajesh Kumar',
-      email: 'rajesh.kumar@mbook.ai',
-      role: 'Senior Auditor',
-    };
-    const mockToken = 'mock-jwt-token-' + Date.now();
-    localStorage.setItem('mbook_token', mockToken);
-    localStorage.setItem('mbook_user', JSON.stringify(mockUser));
-    dispatch({ type: 'SET_USER', payload: mockUser });
+  const login = async (username: string, password: string) => {
+    const { api } = await import('../services/api');
+    const { token, user } = await api.login(username, password);
+    localStorage.setItem('mbook_token', token);
+    localStorage.setItem('mbook_user', JSON.stringify(user));
+    dispatch({ type: 'SET_USER', payload: user });
     dispatch({ type: 'SET_AUTHENTICATED', payload: true });
   };
 

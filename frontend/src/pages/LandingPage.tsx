@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Camera, MapPin, FileSearch, BookOpen, Shield, Zap, ArrowRight } from 'lucide-react';
 import { useApp } from '../store/appStore';
@@ -57,6 +58,7 @@ const steps = [
 export default function LandingPage() {
   const navigate = useNavigate();
   const { state } = useApp();
+  const [expandedFeature, setExpandedFeature] = useState<number | null>(null);
 
   const handleGetStarted = () => {
     if (state.isAuthenticated) {
@@ -150,8 +152,13 @@ export default function LandingPage() {
         <div className="landing__features">
           {features.map((f, i) => {
             const Icon = f.icon;
+            const isExpanded = expandedFeature === i;
             return (
-              <div key={i} className="glass-card landing__feature-card">
+              <div
+                key={i}
+                className={`glass-card landing__feature-card ${isExpanded ? 'landing__feature-card--expanded' : ''}`}
+                onClick={() => setExpandedFeature(isExpanded ? null : i)}
+              >
                 <div
                   className="landing__feature-icon"
                   style={{ background: f.bg, color: f.color }}
@@ -159,7 +166,9 @@ export default function LandingPage() {
                   <Icon size={28} />
                 </div>
                 <h3 className="landing__feature-title">{f.title}</h3>
-                <p className="landing__feature-desc">{f.desc}</p>
+                <div className={`landing__feature-desc-wrapper ${isExpanded ? 'landing__feature-desc-wrapper--open' : ''}`}>
+                  <p className="landing__feature-desc">{f.desc}</p>
+                </div>
               </div>
             );
           })}

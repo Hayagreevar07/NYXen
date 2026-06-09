@@ -97,7 +97,6 @@ export async function extractGPSFromImage(imageBuffer: Buffer): Promise<GPSExifD
       gps: true,
       tiff: true,
       exif: true,
-      ifd0: true,
     });
 
     if (!exif) {

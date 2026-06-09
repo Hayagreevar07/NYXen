@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { FileSearch, Search, MapPin, User, AlertTriangle, CheckCircle, Scale } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { FileSearch, Search, MapPin, User, AlertTriangle, CheckCircle, Scale, Map } from 'lucide-react';
+import { MapContainer, TileLayer, Polygon, Popup, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import GlassCard from '../components/GlassCard';
 import { api } from '../services/api';
 
@@ -8,6 +10,27 @@ interface RegistryResult {
   ownerName: string; areaHectares: number; areaSqm: number; landUse: string;
   encumbrances: string[]; registrationDate: string; ulpin: string;
   hasDisputes: boolean;
+  boundaryPolygon?: [number, number][];
+}
+
+/** Helper: calculate center of a polygon */
+function getPolygonCenter(polygon: [number, number][]): [number, number] {
+  const len = polygon.length;
+  const lat = polygon.reduce((sum, p) => sum + p[0], 0) / len;
+  const lng = polygon.reduce((sum, p) => sum + p[1], 0) / len;
+  return [lat, lng];
+}
+
+/** Helper component to fit the map to the polygon bounds */
+function FitBounds({ polygon }: { polygon: [number, number][] }) {
+  const map = useMap();
+  useEffect(() => {
+    if (polygon.length > 0) {
+      const latLngs = polygon.map(([lat, lng]) => [lat, lng] as [number, number]);
+      map.fitBounds(latLngs, { padding: [40, 40], maxZoom: 17 });
+    }
+  }, [polygon, map]);
+  return null;
 }
 
 export default function RegistryPage() {
@@ -17,6 +40,7 @@ export default function RegistryPage() {
   const [results, setResults] = useState<RegistryResult[]>([]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showMapFor, setShowMapFor] = useState<string | null>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +51,7 @@ export default function RegistryPage() {
       const data = await api.searchRegistry(surveyNumber, district || undefined, state || undefined);
       setResults(data.results || []);
       setSearched(true);
+      setShowMapFor(null);
     } catch (err) {
       console.error(err);
     } finally {
@@ -47,6 +72,15 @@ export default function RegistryPage() {
     commercial: 'var(--color-accent-purple)',
     industrial: 'var(--color-accent-amber)',
     agricultural: 'var(--color-accent-emerald)',
+    mixed: '#ff80ab',
+    institutional: '#80d8ff',
+  };
+
+  const polygonColors: Record<string, string> = {
+    residential: '#00d4ff',
+    commercial: '#a855f7',
+    industrial: '#fbbf24',
+    agricultural: '#10b981',
     mixed: '#ff80ab',
     institutional: '#80d8ff',
   };
@@ -113,10 +147,58 @@ export default function RegistryPage() {
                 {r.village}, {r.taluk}, {r.district} — {r.state}
               </div>
             </div>
-            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-              ULPIN: {r.ulpin}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+              {r.boundaryPolygon && r.boundaryPolygon.length > 0 && (
+                <button
+                  className={`btn btn-sm ${showMapFor === r.surveyNumber ? 'btn-primary' : 'btn-ghost'}`}
+                  onClick={() => setShowMapFor(showMapFor === r.surveyNumber ? null : r.surveyNumber)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Map size={14} />
+                  {showMapFor === r.surveyNumber ? 'Hide Map' : 'View on Map'}
+                </button>
+              )}
+              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                ULPIN: {r.ulpin}
+              </div>
             </div>
           </div>
+
+          {/* Map View */}
+          {showMapFor === r.surveyNumber && r.boundaryPolygon && r.boundaryPolygon.length > 0 && (
+            <div className="map-container" style={{ height: 350, marginTop: 'var(--space-lg)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+              <MapContainer
+                center={getPolygonCenter(r.boundaryPolygon)}
+                zoom={16}
+                style={{ height: '100%', width: '100%' }}
+                scrollWheelZoom={true}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <FitBounds polygon={r.boundaryPolygon} />
+                <Polygon
+                  positions={r.boundaryPolygon}
+                  pathOptions={{
+                    color: polygonColors[r.landUse] || '#00d4ff',
+                    fillColor: polygonColors[r.landUse] || '#00d4ff',
+                    fillOpacity: 0.2,
+                    weight: 3,
+                  }}
+                >
+                  <Popup>
+                    <div style={{ color: '#333', fontSize: '13px' }}>
+                      <strong>{r.surveyNumber}</strong> — {r.village}<br />
+                      Owner: {r.ownerName}<br />
+                      Area: {r.areaHectares} hectares<br />
+                      Land Use: {r.landUse}
+                    </div>
+                  </Popup>
+                </Polygon>
+              </MapContainer>
+            </div>
+          )}
 
           <div className="summary-grid" style={{ marginTop: 'var(--space-xl)' }}>
             <div className="summary-item">

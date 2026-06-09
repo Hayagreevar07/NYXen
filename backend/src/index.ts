@@ -33,7 +33,13 @@ const app = express();
 // ─── Global Middleware ────────────────────────────────────────────
 
 app.use(cors({
-  origin: ENV.CORS_ORIGIN,
+  origin: [
+    ENV.CORS_ORIGIN, 
+    'http://localhost:5174', 
+    'http://localhost:5175', 
+    'http://127.0.0.1:5173', 
+    'http://127.0.0.1:5174'
+  ],
   credentials: true,
 }));
 

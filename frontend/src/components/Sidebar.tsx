@@ -6,7 +6,6 @@ import {
   FileSearch,
   BookOpen,
   Shield,
-  Building2,
   LogOut,
   Moon,
   Sun,
@@ -42,14 +41,9 @@ export default function Sidebar() {
         />
       )}
       <aside className={`sidebar ${state.sidebarOpen ? 'sidebar--open' : ''}`}>
-        <div className="sidebar__brand" style={{ justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
-            <div className="sidebar__logo" style={{ background: 'transparent', width: 40, height: 40, padding: 0 }}>
-              <img src="/logo.png" alt="Nyxen" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 'var(--radius-sm)' }} />
-            </div>
-            <div>
-              <div className="sidebar__brand-name">Nyxen</div>
-            </div>
+        <div className="sidebar__brand" style={{ justifyContent: 'space-between', padding: 'var(--space-lg) var(--space-xl)' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="sidebar__brand-name" style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)' }}>Nyxen</div>
           </div>
           <button
             onClick={() => dispatch({ type: 'TOGGLE_THEME' })}

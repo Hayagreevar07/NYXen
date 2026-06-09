@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Camera, MapPin, FileSearch, BookOpen, Shield, Zap, ArrowRight } from 'lucide-react';
 import { useApp } from '../store/appStore';
@@ -26,7 +27,7 @@ const features = [
   },
   {
     icon: BookOpen,
-    title: 'MBook Generator',
+    title: 'Nyxen Generator',
     desc: 'Generate CPWD/PWD-compliant measurement book entries with automatic quantity calculations and DSR item mapping.',
     color: 'var(--color-accent-amber)',
     bg: 'var(--color-accent-amber-dim)',
@@ -51,12 +52,13 @@ const steps = [
   { num: 1, title: 'Upload Photos', desc: 'Capture site photos with GPS-enabled cameras and upload them to the platform.' },
   { num: 2, title: 'AI Analysis', desc: 'AI processes images to detect elements, extract GPS data, and estimate dimensions.' },
   { num: 3, title: 'Cross-Reference', desc: 'GPS and survey data are validated against land registry records automatically.' },
-  { num: 4, title: 'Generate Report', desc: 'Get CPWD-compliant MBook entries and comprehensive audit reports instantly.' },
+  { num: 4, title: 'Generate Report', desc: 'Get CPWD-compliant Nyxen entries and comprehensive audit reports instantly.' },
 ];
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const { state } = useApp();
+  const [expandedFeature, setExpandedFeature] = useState<number | null>(null);
 
   const handleGetStarted = () => {
     if (state.isAuthenticated) {
@@ -72,7 +74,7 @@ export default function LandingPage() {
       <nav className="landing__nav">
         <div className="landing__nav-brand">
           <Building2 size={24} />
-          MBook AI
+          Nyxen AI
         </div>
         <div className="landing__nav-links">
           <a href="#features" className="landing__nav-link">Features</a>
@@ -99,7 +101,7 @@ export default function LandingPage() {
           </div>
 
           <h1 className="landing__title">
-            Intelligent <span className="landing__title-accent">MBook Verification</span> & Auditing
+            Intelligent <span className="landing__title-accent">Nyxen Verification</span> & Auditing
           </h1>
 
           <p className="landing__subtitle">
@@ -150,8 +152,13 @@ export default function LandingPage() {
         <div className="landing__features">
           {features.map((f, i) => {
             const Icon = f.icon;
+            const isExpanded = expandedFeature === i;
             return (
-              <div key={i} className="glass-card landing__feature-card">
+              <div
+                key={i}
+                className={`glass-card landing__feature-card ${isExpanded ? 'landing__feature-card--expanded' : ''}`}
+                onClick={() => setExpandedFeature(isExpanded ? null : i)}
+              >
                 <div
                   className="landing__feature-icon"
                   style={{ background: f.bg, color: f.color }}
@@ -159,7 +166,9 @@ export default function LandingPage() {
                   <Icon size={28} />
                 </div>
                 <h3 className="landing__feature-title">{f.title}</h3>
-                <p className="landing__feature-desc">{f.desc}</p>
+                <div className={`landing__feature-desc-wrapper ${isExpanded ? 'landing__feature-desc-wrapper--open' : ''}`}>
+                  <p className="landing__feature-desc">{f.desc}</p>
+                </div>
               </div>
             );
           })}

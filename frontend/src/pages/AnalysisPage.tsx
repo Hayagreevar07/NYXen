@@ -5,6 +5,7 @@ import ImageUploader from '../components/ImageUploader';
 import ConfidenceGauge from '../components/ConfidenceGauge';
 import MeasurementTable from '../components/MeasurementTable';
 import { api } from '../services/api';
+import { useApp } from '../store/appStore';
 import type { Measurement } from '../store/appStore';
 
 interface AnalysisResult {
@@ -46,10 +47,14 @@ interface AnalysisResult {
 type Stage = 'upload' | 'uploading' | 'analyzing' | 'complete';
 
 export default function AnalysisPage() {
+  const { state: appState } = useApp();
   const [files, setFiles] = useState<File[]>([]);
   const [stage, setStage] = useState<Stage>('upload');
   const [results, setResults] = useState<AnalysisResult[]>([]);
   const [error, setError] = useState('');
+
+  const userRole = appState.user?.role?.toLowerCase() || '';
+  const canUpload = ['admin', 'engineer', 'jr. engineer'].includes(userRole);
 
   const stages = [
     { id: 'upload', label: 'Upload', icon: Camera },
@@ -78,6 +83,24 @@ export default function AnalysisPage() {
       setStage('complete');
     } catch (err: any) {
       setError(err.message || 'Analysis failed');
+      setStage('upload');
+    }
+  };
+
+  const handleDemoAnalyze = async (presetId: string) => {
+    setError('');
+    try {
+      setStage('uploading');
+      await new Promise(resolve => setTimeout(resolve, 800));
+      setStage('analyzing');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const analysisResult = await api.analyzeImages([presetId]);
+
+      setResults(analysisResult.results || []);
+      setStage('complete');
+    } catch (err: any) {
+      setError(err.message || 'Demo analysis failed');
       setStage('upload');
     }
   };
@@ -143,14 +166,58 @@ export default function AnalysisPage() {
       {/* Upload Section */}
       {stage === 'upload' && (
         <GlassCard title="Upload Site Photos" subtitle="Drag & drop construction site images" icon={Camera} iconColor="blue">
-          <ImageUploader onFilesSelected={setFiles} maxFiles={10} />
-          {files.length > 0 && (
-            <div style={{ marginTop: 'var(--space-xl)', textAlign: 'right' }}>
-              <button className="btn btn-primary" onClick={handleAnalyze}>
-                <Cpu size={18} /> Analyze {files.length} Image{files.length > 1 ? 's' : ''}
-              </button>
+          {canUpload ? (
+            <>
+              <ImageUploader onFilesSelected={setFiles} maxFiles={10} />
+              {files.length > 0 && (
+                <div style={{ marginTop: 'var(--space-xl)', textAlign: 'right' }}>
+                  <button className="btn btn-primary" onClick={handleAnalyze}>
+                    <Cpu size={18} /> Analyze {files.length} Image{files.length > 1 ? 's' : ''}
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{
+              padding: 'var(--space-lg)',
+              background: 'rgba(255, 171, 0, 0.1)',
+              border: '1px solid rgba(255, 171, 0, 0.25)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--color-accent-amber)',
+              fontSize: 'var(--font-size-sm)',
+              textAlign: 'center',
+            }}>
+              🔒 <strong>{appState.user?.role}</strong> role cannot upload images — you can view results using demo presets below
             </div>
           )}
+
+          {/* Try with Demo Presets */}
+          <div style={{ marginTop: 'var(--space-2xl)', paddingTop: 'var(--space-xl)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-md)', fontWeight: 600 }}>
+              {canUpload ? 'Or Try with Demo Presets' : 'View Demo Analysis Results'}
+            </div>
+            <div className="grid-3" style={{ gap: 'var(--space-md)' }}>
+              {[
+                { id: 'demo-foundation', title: 'Foundation Stage', desc: 'Simulates foundation earthwork, trenches, rebar, M-25 concrete.' },
+                { id: 'demo-framework', title: 'Structural Frame', desc: 'Simulates columns, beams, M-30 concrete framework.' },
+                { id: 'demo-masonry', title: 'Masonry Work', desc: 'Simulates wall brickwork, Teak wood door frames, UPVC windows.' },
+              ].map((preset) => (
+                <button
+                  key={preset.id}
+                  className="quick-action"
+                  style={{ flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', padding: 'var(--space-md)', height: 'auto', gap: '4px' }}
+                  onClick={() => handleDemoAnalyze(preset.id)}
+                >
+                  <div style={{ fontWeight: 600, color: 'var(--color-accent-blue)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Cpu size={14} /> {preset.title}
+                  </div>
+                  <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-tertiary)' }}>
+                    {preset.desc}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
         </GlassCard>
       )}
 

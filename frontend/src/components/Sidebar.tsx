@@ -8,15 +8,17 @@ import {
   Shield,
   Building2,
   LogOut,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import { useApp } from '../store/appStore';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/analysis', label: 'Image Analysis', icon: Camera },
-  { path: '/gps', label: 'GPS Verification', icon: MapPin },
+  { path: '/gps', label: 'GPS Data', icon: MapPin },
   { path: '/registry', label: 'Land Registry', icon: FileSearch },
-  { path: '/mbook', label: 'MBook Generator', icon: BookOpen },
+  { path: '/nyxen', label: 'Nyxen Generator', icon: BookOpen },
   { path: '/audit', label: 'Audit Reports', icon: Shield },
 ];
 
@@ -40,14 +42,23 @@ export default function Sidebar() {
         />
       )}
       <aside className={`sidebar ${state.sidebarOpen ? 'sidebar--open' : ''}`}>
-        <div className="sidebar__brand">
-          <div className="sidebar__logo">
-            <Building2 size={22} />
+        <div className="sidebar__brand" style={{ justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+            <div className="sidebar__logo" style={{ background: 'transparent', width: 40, height: 40, padding: 0 }}>
+              <img src="/logo.png" alt="Nyxen" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 'var(--radius-sm)' }} />
+            </div>
+            <div>
+              <div className="sidebar__brand-name">Nyxen</div>
+            </div>
           </div>
-          <div>
-            <div className="sidebar__brand-name">MBook AI</div>
-            <div className="sidebar__brand-sub">Construction Verification</div>
-          </div>
+          <button
+            onClick={() => dispatch({ type: 'TOGGLE_THEME' })}
+            className="btn-icon"
+            style={{ color: 'var(--color-text-tertiary)' }}
+            title={state.theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {state.theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
         </div>
 
         <nav className="sidebar__nav">

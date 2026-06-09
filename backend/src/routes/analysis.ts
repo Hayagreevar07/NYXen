@@ -99,23 +99,34 @@ router.post('/analyze', async (req: Request, res: Response) => {
     const results = [];
 
     for (const imageId of imageIds) {
-      const fileEntry = uploadedFiles.get(imageId);
+      let buffer: Buffer;
+      let originalName: string;
 
-      if (!fileEntry) {
-        results.push({ imageId, error: 'File not found' });
-        continue;
+      if (typeof imageId === 'string' && imageId.startsWith('demo-')) {
+        // 1x1 transparent PNG
+        buffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
+        originalName = imageId === 'demo-foundation'
+          ? 'foundation_excavation.jpg'
+          : imageId === 'demo-framework'
+          ? 'concrete_columns.jpg'
+          : 'brick_masonry_wall.jpg';
+      } else {
+        const fileEntry = uploadedFiles.get(imageId);
+        if (!fileEntry) {
+          results.push({ imageId, error: 'File not found' });
+          continue;
+        }
+        buffer = fs.readFileSync(fileEntry.path);
+        originalName = fileEntry.originalName;
       }
 
-      // Read the file buffer
-      const buffer = fs.readFileSync(fileEntry.path);
-
       // Run analysis
-      const analysis = await analyzeConstructionElements(buffer);
+      const analysis = await analyzeConstructionElements(buffer, imageId);
       const measurements = generateMeasurements(analysis);
 
       results.push({
         imageId,
-        originalName: fileEntry.originalName,
+        originalName,
         analysis,
         measurements,
       });

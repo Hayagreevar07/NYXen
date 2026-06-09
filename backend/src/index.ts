@@ -1,5 +1,5 @@
 /**
- * MBook AI Backend — Express Server Entry Point
+ * Nyxen AI Backend — Express Server Entry Point
  * 
  * Mounts all API routes, configures middleware, and seeds sample data.
  * Runs on port 3001 (configurable via PORT env var).
@@ -21,7 +21,7 @@ import projectRoutes from './routes/projects';
 import analysisRoutes from './routes/analysis';
 import gpsRoutes from './routes/gps';
 import registryRoutes from './routes/registry';
-import mbookRoutes from './routes/mbook';
+import nyxenRoutes from './routes/nyxen';
 import auditRoutes from './routes/audit';
 import dashboardRoutes from './routes/dashboard';
 
@@ -33,7 +33,13 @@ const app = express();
 // ─── Global Middleware ────────────────────────────────────────────
 
 app.use(cors({
-  origin: ENV.CORS_ORIGIN,
+  origin: [
+    ENV.CORS_ORIGIN, 
+    'http://localhost:5174', 
+    'http://localhost:5175', 
+    'http://127.0.0.1:5173', 
+    'http://127.0.0.1:5174'
+  ],
   credentials: true,
 }));
 
@@ -59,7 +65,7 @@ app.use('/api/projects', optionalAuth, projectRoutes);
 app.use('/api/analysis', optionalAuth, analysisRoutes);
 app.use('/api/gps', optionalAuth, gpsRoutes);
 app.use('/api/registry', optionalAuth, registryRoutes);
-app.use('/api/mbook', optionalAuth, mbookRoutes);
+app.use('/api/nyxen', optionalAuth, nyxenRoutes);
 app.use('/api/audit', optionalAuth, auditRoutes);
 app.use('/api/dashboard', optionalAuth, dashboardRoutes);
 
@@ -68,7 +74,7 @@ app.use('/api/dashboard', optionalAuth, dashboardRoutes);
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'healthy',
-    service: 'MBook AI Backend',
+    service: 'Nyxen AI Backend',
     timestamp: new Date().toISOString(),
     version: '1.0.0',
   });
@@ -105,7 +111,7 @@ seedData();
 app.listen(ENV.PORT, () => {
   console.log(`
   ╔═══════════════════════════════════════╗
-  ║     🏗️  MBook AI Backend Server       ║
+  ║     🏗️  Nyxen AI Backend Server       ║
   ║     Port: ${ENV.PORT}                        ║
   ║     Mode: ${ENV.NODE_ENV.padEnd(23)}║
   ║     CORS: ${ENV.CORS_ORIGIN.padEnd(23)}║

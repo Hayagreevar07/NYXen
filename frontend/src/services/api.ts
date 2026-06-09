@@ -1,7 +1,7 @@
 const API_BASE_URL = 'http://localhost:3001/api';
 
 function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem('mbook_token');
+  const token = localStorage.getItem('nyxen_token');
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -42,7 +42,7 @@ export const api = {
   async uploadImages(files: File[]) {
     const formData = new FormData();
     files.forEach((f) => formData.append('images', f));
-    const token = localStorage.getItem('mbook_token');
+    const token = localStorage.getItem('nyxen_token');
     const res = await fetch(`${API_BASE_URL}/analysis/upload`, {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -81,14 +81,14 @@ export const api = {
     return handleResponse<any>(res);
   },
 
-  // MBook
-  async getMBook(projectId: string) {
-    const res = await fetch(`${API_BASE_URL}/mbook/${projectId}`, { headers: getAuthHeaders() });
+  // Nyxen
+  async getNyxen(projectId: string) {
+    const res = await fetch(`${API_BASE_URL}/nyxen/${projectId}`, { headers: getAuthHeaders() });
     return handleResponse<any>(res);
   },
 
-  async updateMBookEntry(projectId: string, entryId: string, data: any) {
-    const res = await fetch(`${API_BASE_URL}/mbook/${projectId}/entries/${entryId}`, {
+  async updateNyxenEntry(projectId: string, entryId: string, data: any) {
+    const res = await fetch(`${API_BASE_URL}/nyxen/${projectId}/entries/${entryId}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -96,8 +96,8 @@ export const api = {
     return handleResponse<any>(res);
   },
 
-  async exportMBook(projectId: string, format: 'json' | 'csv') {
-    const res = await fetch(`${API_BASE_URL}/mbook/${projectId}/export?format=${format}`, {
+  async exportNyxen(projectId: string, format: 'json' | 'csv') {
+    const res = await fetch(`${API_BASE_URL}/nyxen/${projectId}/export?format=${format}`, {
       headers: getAuthHeaders(),
     });
     return handleResponse<any>(res);

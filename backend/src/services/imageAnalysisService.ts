@@ -97,7 +97,6 @@ export async function extractGPSFromImage(imageBuffer: Buffer): Promise<GPSExifD
       gps: true,
       tiff: true,
       exif: true,
-      ifd0: true,
     });
 
     if (!exif) {
@@ -250,20 +249,68 @@ export async function estimateDimensions(
  * @returns Analysis result with detected elements
  */
 export async function analyzeConstructionElements(
-  imageBuffer: Buffer
+  imageBuffer: Buffer,
+  imageId?: string
 ): Promise<ImageAnalysisResult> {
   // Extract GPS data first
-  const gpsData = await extractGPSFromImage(imageBuffer);
+  let gpsData = await extractGPSFromImage(imageBuffer);
 
   try {
-    const metadata = await sharp(imageBuffer).metadata();
-    const imgWidth = metadata.width || 1920;
-    const imgHeight = metadata.height || 1080;
+    let imgWidth = 1920;
+    let imgHeight = 1080;
+    let avgBrightness = 128;
+    let avgContrast = 50;
 
-    // Get image statistics for simulation variability
-    const stats = await sharp(imageBuffer).stats();
-    const avgBrightness = stats.channels.reduce((sum, ch) => sum + ch.mean, 0) / stats.channels.length;
-    const avgContrast = stats.channels.reduce((sum, ch) => sum + ch.stdev, 0) / stats.channels.length;
+    // If it is a demo ID, override values to avoid sharp crash on 1x1 PNG and simulate realistic image stats
+    if (imageId && imageId.startsWith('demo-')) {
+      if (imageId === 'demo-foundation') {
+        avgBrightness = 100;
+        avgContrast = 30; // Maps to Foundation/Earthwork Stage
+        gpsData = {
+          latitude: 12.9248, // Jayanagar parcel
+          longitude: 77.5836,
+          altitude: 920,
+          timestamp: new Date().toISOString(),
+          camera: 'Apple iPhone 15 Pro',
+          imageWidth: 1920,
+          imageHeight: 1080,
+          gpsAccuracy: 3.5,
+        };
+      } else if (imageId === 'demo-framework') {
+        avgBrightness = 150;
+        avgContrast = 40; // Maps to Structural Framework
+        gpsData = {
+          latitude: 13.0359, // Hebbal IT Park
+          longitude: 77.5971,
+          altitude: 915,
+          timestamp: new Date().toISOString(),
+          camera: 'Samsung Galaxy S24 Ultra',
+          imageWidth: 1920,
+          imageHeight: 1080,
+          gpsAccuracy: 4.5,
+        };
+      } else {
+        avgBrightness = 200;
+        avgContrast = 50; // Maps to Masonry Work
+        gpsData = {
+          latitude: 18.5596, // Baner Highway Overpass
+          longitude: 73.7868,
+          altitude: 560,
+          timestamp: new Date().toISOString(),
+          camera: 'Sony Alpha 7R V',
+          imageWidth: 1920,
+          imageHeight: 1080,
+          gpsAccuracy: 2.8,
+        };
+      }
+    } else {
+      const metadata = await sharp(imageBuffer).metadata();
+      imgWidth = metadata.width || 1920;
+      imgHeight = metadata.height || 1080;
+      const stats = await sharp(imageBuffer).stats();
+      avgBrightness = stats.channels.reduce((sum, ch) => sum + ch.mean, 0) / stats.channels.length;
+      avgContrast = stats.channels.reduce((sum, ch) => sum + ch.stdev, 0) / stats.channels.length;
+    }
 
     // Use image stats as a seed for deterministic but varied results
     const seed = Math.round(avgBrightness * 100 + avgContrast * 10);
@@ -551,11 +598,11 @@ function generateSimulatedElements(
 // ─── Measurement Generation ───────────────────────────────────────
 
 /**
- * Convert detected construction elements into MBook measurement entries.
+ * Convert detected construction elements into Nyxen measurement entries.
  * Maps element types to CPWD DSR item codes and calculates quantities.
  * 
  * @param analysisResult - Output from analyzeConstructionElements()
- * @returns Array of partial measurement objects ready for MBook entry
+ * @returns Array of partial measurement objects ready for Nyxen entry
  */
 export function generateMeasurements(
   analysisResult: ImageAnalysisResult

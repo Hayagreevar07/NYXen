@@ -1,7 +1,7 @@
 /**
  * Measurement Model
  * 
- * Represents a single measurement entry in a construction MBook.
+ * Represents a single measurement entry in a construction Nyxen.
  * Follows CPWD (Central Public Works Department) measurement recording standards.
  * 
  * The measurement formula follows the standard:
@@ -178,16 +178,47 @@ export class MeasurementStore {
     const index = measurements.findIndex((m) => m.id === id);
     if (index === -1) return null;
 
-    measurements[index] = { ...measurements[index], ...data };
+    const current = measurements[index];
+    const updated = { ...current, ...data };
 
-    // Recalculate amount if rate or quantity changed
-    if (data.rate !== undefined || data.quantity !== undefined) {
-      const m = measurements[index];
-      measurements[index].amount = m.quantity * m.rate;
+    // Recalculate quantity if dimensions changed
+    if (
+      data.number !== undefined ||
+      data.length !== undefined ||
+      data.breadth !== undefined ||
+      data.depth !== undefined
+    ) {
+      if (updated.unit === 'Cum') {
+        updated.quantity = updated.number * updated.length * updated.breadth * updated.depth;
+      } else if (updated.unit === 'Sqm') {
+        updated.quantity = updated.number * updated.length * updated.breadth;
+      } else if (updated.unit === 'Rmt') {
+        updated.quantity = updated.number * updated.length;
+      } else if (updated.unit === 'Nos') {
+        updated.quantity = updated.number;
+      } else if (updated.unit === 'Kg') {
+        updated.quantity = updated.number * updated.length;
+      }
+      
+      // Round quantity to 2 decimal places
+      updated.quantity = Math.round(updated.quantity * 100) / 100;
     }
 
+    // Recalculate amount if quantity or rate changed
+    if (
+      data.rate !== undefined ||
+      data.number !== undefined ||
+      data.length !== undefined ||
+      data.breadth !== undefined ||
+      data.depth !== undefined ||
+      data.quantity !== undefined
+    ) {
+      updated.amount = Math.round(updated.quantity * updated.rate * 100) / 100;
+    }
+
+    measurements[index] = updated;
     writeAll(measurements);
-    return measurements[index];
+    return updated;
   }
 
   static delete(id: string): boolean {

@@ -8,7 +8,7 @@ export const ENV = {
   PORT: parseInt(process.env.PORT || '3001', 10),
 
   /** JWT secret for signing tokens */
-  JWT_SECRET: process.env.JWT_SECRET || 'mbook-ai-secret-key-2024-construction-audit',
+  JWT_SECRET: process.env.JWT_SECRET || 'nyxen-ai-secret-key-2024-construction-audit',
 
   /** JWT token expiry duration */
   JWT_EXPIRY: process.env.JWT_EXPIRY || '24h',

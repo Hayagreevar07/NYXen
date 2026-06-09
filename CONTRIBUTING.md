@@ -1,6 +1,6 @@
-# Contributing to MBook AI
+# Contributing to Nyxen AI
 
-Thank you for contributing to the MBook AI Construction Verification System! This guide will help you get started.
+Thank you for contributing to the Nyxen AI Construction Verification System! This guide will help you get started.
 
 ## 🔧 Development Setup
 
@@ -66,7 +66,7 @@ refactor/what-changed        # Code refactoring
 Follow [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 feat: add GPS validation endpoint
-fix: correct MBook quantity calculation
+fix: correct Nyxen quantity calculation
 docs: update API documentation
 style: improve dashboard card layout
 refactor: extract measurement logic to service
@@ -133,4 +133,4 @@ Open an issue with:
 
 ---
 
-Thank you for making MBook AI better! 🏗️
+Thank you for making Nyxen AI better! 🏗️

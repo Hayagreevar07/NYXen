@@ -3,7 +3,7 @@
  * 
  * Provides GPS validation, geofencing, and spatial analysis using Turf.js.
  * Used to verify that construction site measurements were taken at the correct
- * location — critical for preventing fraudulent MBook entries.
+ * location — critical for preventing fraudulent Nyxen entries.
  * 
  * Key capabilities:
  * 1. Point-in-polygon checks (is the GPS point within the parcel boundary?)

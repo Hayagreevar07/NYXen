@@ -17,7 +17,7 @@ const DEMO_USERS = [
     username: 'admin',
     passwordHash: bcrypt.hashSync('admin123', 10),
     name: 'Rajesh Kumar',
-    email: 'rajesh.kumar@mbook.ai',
+    email: 'rajesh.kumar@nyxen.ai',
     role: 'Admin',
   },
   {
@@ -25,7 +25,7 @@ const DEMO_USERS = [
     username: 'engineer',
     passwordHash: bcrypt.hashSync('eng123', 10),
     name: 'Vikram Reddy',
-    email: 'vikram.reddy@mbook.ai',
+    email: 'vikram.reddy@nyxen.ai',
     role: 'Engineer',
   },
   {
@@ -33,8 +33,24 @@ const DEMO_USERS = [
     username: 'auditor',
     passwordHash: bcrypt.hashSync('audit123', 10),
     name: 'Meera Nair',
-    email: 'meera.nair@mbook.ai',
+    email: 'meera.nair@nyxen.ai',
     role: 'Auditor',
+  },
+  {
+    id: 'user-004',
+    username: 'supervisor',
+    passwordHash: bcrypt.hashSync('super123', 10),
+    name: 'Priya Sharma',
+    email: 'priya.sharma@nyxen.ai',
+    role: 'Supervisor',
+  },
+  {
+    id: 'user-005',
+    username: 'jrengineer',
+    passwordHash: bcrypt.hashSync('jre123', 10),
+    name: 'Arun Patel',
+    email: 'arun.patel@nyxen.ai',
+    role: 'Jr. Engineer',
   },
 ];
 

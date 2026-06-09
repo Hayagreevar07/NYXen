@@ -1,7 +1,7 @@
 /**
  * Project Model
  * 
- * Represents a construction project in the MBook system.
+ * Represents a construction project in the Nyxen system.
  * Includes JSON-file-based CRUD operations for persistence.
  */
 

@@ -1,4 +1,4 @@
-# 🏗️ MBook AI — Construction Verification & Auditing System
+# 🏗️ Nyxen AI — Construction Verification & Auditing System
 
 <div align="center">
 
@@ -15,7 +15,7 @@
 
 ## 🎯 Problem Statement
 
-Current construction measurement book (MBook) verification and auditing processes rely heavily on:
+Current construction measurement book (Nyxen) verification and auditing processes rely heavily on:
 - Manual site inspections and physical measurements
 - Paper-based recording and human validation
 - No instant verification of construction location vs. authorized land parcel
@@ -25,14 +25,14 @@ Current construction measurement book (MBook) verification and auditing processe
 
 ## 💡 Solution
 
-MBook AI is an intelligent platform that **autonomously**:
+Nyxen AI is an intelligent platform that **autonomously**:
 
 | Feature | Description |
 |---------|-------------|
 | 📸 **Image Analysis** | Analyzes site photos using photogrammetry to extract physical dimensions and quantities |
 | 📍 **GPS Validation** | Validates GPS location data from image EXIF metadata against authorized parcels |
 | 🗺️ **Land Registry** | Cross-references survey numbers with official land registry records |
-| 📏 **MBook Generation** | Generates CPWD/PWD-compliant measurement book entries automatically |
+| 📏 **Nyxen Generation** | Generates CPWD/PWD-compliant measurement book entries automatically |
 | 🛡️ **Audit Reports** | Produces compliance reports with confidence scores and discrepancy detection |
 
 ## 🏛️ Architecture
@@ -41,13 +41,13 @@ MBook AI is an intelligent platform that **autonomously**:
 ┌─────────────────────────────────────────────────────┐
 │              Frontend (React + Vite + TS)            │
 │  Landing → Dashboard → Analysis → GPS → Registry    │
-│           → MBook Generator → Audit Reports          │
+│           → Nyxen Generator → Audit Reports          │
 └──────────────────────┬──────────────────────────────┘
                        │ REST API
 ┌──────────────────────▼──────────────────────────────┐
 │            Backend (Express + TypeScript)             │
 │  Image Analysis │ GPS Validation │ Land Registry     │
-│  MBook Service  │ Audit Engine   │ Auth (JWT)        │
+│  Nyxen Service  │ Audit Engine   │ Auth (JWT)        │
 └──────────────────────┬──────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────┐
@@ -134,7 +134,7 @@ npm run dev:frontend   # Vite dev server on http://localhost:5173
 - Encumbrance and dispute checking
 - ULPIN (Bhu-Aadhar) support
 
-### 📏 MBook Generator
+### 📏 Nyxen Generator
 - CPWD/PWD-compliant measurement entries
 - Automatic quantity calculation (L × B × H)
 - CPWD DSR item code mapping
@@ -206,5 +206,5 @@ Built by the **NYXen Team** 🚀
 ---
 
 <div align="center">
-<strong>MBook AI</strong> — Bringing transparency and accuracy to construction verification
+<strong>Nyxen AI</strong> — Bringing transparency and accuracy to construction verification
 </div>

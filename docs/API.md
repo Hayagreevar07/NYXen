@@ -1,4 +1,4 @@
-# API Reference — MBook AI
+# API Reference — Nyxen AI
 
 Base URL: `http://localhost:3001/api`
 
@@ -234,10 +234,10 @@ Cross-reference survey number with GPS coordinates.
 
 ---
 
-## MBook
+## Nyxen
 
-### POST /api/mbook/generate 🔒
-Generate MBook entries from analysis results.
+### POST /api/nyxen/generate 🔒
+Generate Nyxen entries from analysis results.
 
 **Request:**
 ```json
@@ -252,7 +252,7 @@ Generate MBook entries from analysis results.
 {
   "success": true,
   "data": {
-    "mbookId": "mbook-001",
+    "nyxenId": "nyxen-001",
     "projectId": "proj-001",
     "entries": [
       {
@@ -284,11 +284,11 @@ Generate MBook entries from analysis results.
 }
 ```
 
-### GET /api/mbook/:projectId 🔒
-Get MBook for project.
+### GET /api/nyxen/:projectId 🔒
+Get Nyxen for project.
 
-### GET /api/mbook/:projectId/export?format=csv 🔒
-Export MBook.
+### GET /api/nyxen/:projectId/export?format=csv 🔒
+Export Nyxen.
 
 ---
 

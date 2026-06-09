@@ -4,7 +4,7 @@ import type { Measurement } from '../store/appStore';
 
 interface MeasurementTableProps {
   measurements: Measurement[];
-  editable?: boolean;
+  editable?: boolean | 'remarks-only';
   onUpdate?: (id: string, field: string, value: number | string) => void;
 }
 
@@ -27,6 +27,9 @@ export default function MeasurementTable({
 }: MeasurementTableProps) {
   const [sortField, setSortField] = useState<string>('sno');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+
+  const canEditDimensions = editable === true;
+  const canEditRemarks = editable === true || editable === 'remarks-only';
 
   const handleSort = (field: string) => {
     if (sortField === field) {
@@ -64,6 +67,15 @@ export default function MeasurementTable({
     onUpdate(id, field, isNaN(num) ? val : num);
   };
 
+  const inputStyle: React.CSSProperties = {
+    padding: '4px 8px',
+    width: '70px',
+    fontSize: 'var(--font-size-sm)',
+    fontFamily: 'var(--font-mono)',
+    background: 'transparent',
+    border: '1px solid transparent',
+  };
+
   return (
     <div className="table-container">
       <table className="table">
@@ -91,6 +103,7 @@ export default function MeasurementTable({
             <th onClick={() => handleSort('confidence')} style={{ cursor: 'pointer' }}>
               Confidence <SortIcon field="confidence" />
             </th>
+            {canEditRemarks && <th>Remarks</th>}
           </tr>
         </thead>
         <tbody>
@@ -103,7 +116,7 @@ export default function MeasurementTable({
             >
               <td className="measurement-value">{m.sno}</td>
               <td>
-                {editable ? (
+                {canEditDimensions ? (
                   <input
                     className="input"
                     style={{ padding: '4px 8px', fontSize: 'var(--font-size-sm)', background: 'transparent', border: '1px solid transparent' }}
@@ -136,11 +149,11 @@ export default function MeasurementTable({
               </td>
               <td className="measurement-value">{m.number}</td>
               <td className="measurement-value">
-                {editable ? (
+                {canEditDimensions ? (
                   <input
                     className="input"
                     type="number"
-                    style={{ padding: '4px 8px', width: '70px', fontSize: 'var(--font-size-sm)', fontFamily: 'var(--font-mono)', background: 'transparent', border: '1px solid transparent' }}
+                    style={inputStyle}
                     defaultValue={m.length}
                     onBlur={(e) => handleCellChange(m.id, 'length', e.target.value)}
                   />
@@ -149,11 +162,11 @@ export default function MeasurementTable({
                 )}
               </td>
               <td className="measurement-value">
-                {editable ? (
+                {canEditDimensions ? (
                   <input
                     className="input"
                     type="number"
-                    style={{ padding: '4px 8px', width: '70px', fontSize: 'var(--font-size-sm)', fontFamily: 'var(--font-mono)', background: 'transparent', border: '1px solid transparent' }}
+                    style={inputStyle}
                     defaultValue={m.breadth}
                     onBlur={(e) => handleCellChange(m.id, 'breadth', e.target.value)}
                   />
@@ -162,11 +175,11 @@ export default function MeasurementTable({
                 )}
               </td>
               <td className="measurement-value">
-                {editable ? (
+                {canEditDimensions ? (
                   <input
                     className="input"
                     type="number"
-                    style={{ padding: '4px 8px', width: '70px', fontSize: 'var(--font-size-sm)', fontFamily: 'var(--font-mono)', background: 'transparent', border: '1px solid transparent' }}
+                    style={inputStyle}
                     defaultValue={m.depthOrHeight}
                     onBlur={(e) => handleCellChange(m.id, 'depthOrHeight', e.target.value)}
                   />
@@ -218,6 +231,24 @@ export default function MeasurementTable({
                   </span>
                 </div>
               </td>
+              {canEditRemarks && (
+                <td>
+                  <input
+                    className="input"
+                    style={{
+                      padding: '4px 8px',
+                      width: '120px',
+                      fontSize: 'var(--font-size-sm)',
+                      background: 'transparent',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '4px',
+                    }}
+                    placeholder="Add remark…"
+                    defaultValue={(m as any).remarks || ''}
+                    onBlur={(e) => handleCellChange(m.id, 'remarks', e.target.value)}
+                  />
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -233,6 +264,7 @@ export default function MeasurementTable({
               </td>
             )}
             <td></td>
+            {canEditRemarks && <td></td>}
           </tr>
         </tfoot>
       </table>

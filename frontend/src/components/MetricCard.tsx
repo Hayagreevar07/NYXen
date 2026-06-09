@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { LucideIcon, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface MetricCardProps {
   label: string;
@@ -43,7 +44,10 @@ export default function MetricCard({
       setDisplayValue(Math.round(current * 10) / 10);
     }, stepTime);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      animated.current = false;
+    };
   }, [value]);
 
   const bgColors: Record<string, string> = {

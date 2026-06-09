@@ -5,16 +5,16 @@ import { useApp } from '../store/appStore';
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
   '/dashboard': { title: 'Dashboard', subtitle: 'Overview of all projects and activities' },
   '/analysis': { title: 'Image Analysis', subtitle: 'AI-powered construction image analysis' },
-  '/gps': { title: 'GPS Verification', subtitle: 'Validate site coordinates and boundaries' },
+  '/gps': { title: 'GPS Data', subtitle: 'Validate site coordinates and boundaries' },
   '/registry': { title: 'Land Registry', subtitle: 'Cross-reference land records and surveys' },
-  '/mbook': { title: 'MBook Generator', subtitle: 'Measurement book generation and management' },
+  '/nyxen': { title: 'Nyxen Generator', subtitle: 'Measurement book generation and management' },
   '/audit': { title: 'Audit Reports', subtitle: 'Compliance audit and verification reports' },
 };
 
 export default function Header() {
   const location = useLocation();
   const { state, dispatch } = useApp();
-  const pageInfo = pageTitles[location.pathname] || { title: 'MBook AI', subtitle: '' };
+  const pageInfo = pageTitles[location.pathname] || { title: 'Nyxen', subtitle: '' };
 
   return (
     <header className="header">

@@ -1,8 +1,8 @@
 /**
- * MBook Routes
- * GET  /api/mbook/:projectId             — Get MBook for project
- * PUT  /api/mbook/:projectId/entries/:id — Update entry
- * GET  /api/mbook/:projectId/export      — Export as JSON/CSV
+ * Nyxen Routes
+ * GET  /api/nyxen/:projectId             — Get Nyxen for project
+ * PUT  /api/nyxen/:projectId/entries/:id — Update entry
+ * GET  /api/nyxen/:projectId/export      — Export as JSON/CSV
  */
 
 import { Router, Request, Response } from 'express';
@@ -12,7 +12,7 @@ import { ProjectStore } from '../models/Project';
 const router = Router();
 
 /**
- * GET /api/mbook/:projectId
+ * GET /api/nyxen/:projectId
  */
 router.get('/:projectId', (req: Request, res: Response) => {
   try {
@@ -38,16 +38,42 @@ router.get('/:projectId', (req: Request, res: Response) => {
       summary,
     });
   } catch (error) {
-    console.error('Error fetching MBook:', error);
-    res.status(500).json({ message: 'Failed to fetch MBook' });
+    console.error('Error fetching Nyxen:', error);
+    res.status(500).json({ message: 'Failed to fetch Nyxen' });
   }
 });
 
 /**
- * PUT /api/mbook/:projectId/entries/:entryId
+ * PUT /api/nyxen/:projectId/entries/:entryId
+ * Role restrictions:
+ *  - Admin, Engineer, Jr. Engineer: update any field
+ *  - Supervisor: update only 'remarks'
+ *  - Auditor: 403 Forbidden
  */
 router.put('/:projectId/entries/:entryId', (req: Request, res: Response) => {
   try {
+    const userRole = (req.user?.role || '').toLowerCase();
+
+    // Auditor cannot modify anything
+    if (userRole === 'auditor') {
+      res.status(403).json({ message: 'Access denied — Auditors have read-only access' });
+      return;
+    }
+
+    // Supervisor can only update the 'remarks' field
+    if (userRole === 'supervisor') {
+      const allowedFields = ['remarks'];
+      const attemptedFields = Object.keys(req.body);
+      const disallowed = attemptedFields.filter((f) => !allowedFields.includes(f));
+
+      if (disallowed.length > 0) {
+        res.status(403).json({
+          message: `Access denied — Supervisors can only update remarks. Disallowed fields: ${disallowed.join(', ')}`,
+        });
+        return;
+      }
+    }
+
     const updated = MeasurementStore.update(req.params.entryId, req.body);
     if (!updated) {
       res.status(404).json({ message: 'Measurement entry not found' });
@@ -61,7 +87,7 @@ router.put('/:projectId/entries/:entryId', (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/mbook/:projectId/export
+ * GET /api/nyxen/:projectId/export
  * Query: ?format=json|csv
  */
 router.get('/:projectId/export', (req: Request, res: Response) => {
@@ -95,7 +121,7 @@ router.get('/:projectId/export', (req: Request, res: Response) => {
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader(
         'Content-Disposition',
-        `attachment; filename="MBook_${project.name.replace(/\s+/g, '_')}.csv"`
+        `attachment; filename="Nyxen_${project.name.replace(/\s+/g, '_')}.csv"`
       );
       res.send(csv);
     } else {

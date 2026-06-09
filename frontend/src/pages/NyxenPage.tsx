@@ -3,6 +3,7 @@ import { BookOpen, Download, FileText, ChevronDown } from 'lucide-react';
 import GlassCard from '../components/GlassCard';
 import MeasurementTable from '../components/MeasurementTable';
 import { api } from '../services/api';
+import { useApp } from '../store/appStore';
 import type { Measurement } from '../store/appStore';
 
 interface ProjectOption {
@@ -10,7 +11,7 @@ interface ProjectOption {
   name: string;
 }
 
-interface MBookData {
+interface NyxenData {
   project: {
     id: string; name: string; contractor: string; engineer: string;
     location: { lat: number; lng: number; address: string }; surveyNumber: string;
@@ -28,11 +29,65 @@ interface MBookData {
   };
 }
 
-export default function MBookPage() {
+export default function NyxenPage() {
+  const { state: appState } = useApp();
   const [projects, setProjects] = useState<ProjectOption[]>([]);
   const [selectedProject, setSelectedProject] = useState('');
-  const [mbookData, setMbookData] = useState<MBookData | null>(null);
+  const [nyxenData, setNyxenData] = useState<NyxenData | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const handleUpdateEntry = async (entryId: string, field: string, value: any) => {
+    if (!selectedProject) return;
+    try {
+      const m = nyxenData?.measurements.find((meas) => meas.id === entryId);
+      if (!m) return;
+
+      const backendField = field === 'depthOrHeight' ? 'depth' : field;
+      const updatedData = { [backendField]: value };
+      
+      const updatedEntry = await api.updateNyxenEntry(selectedProject, entryId, updatedData);
+      
+      setNyxenData(prev => {
+        if (!prev) return null;
+        const newMeasurements = prev.measurements.map(item => item.id === entryId ? { ...item, ...updatedEntry } : item);
+        
+        let totalAmount = 0;
+        let totalConfidence = 0;
+        let verifiedCount = 0;
+        let aiEstimatedCount = 0;
+        const categorySummary: Record<string, { count: number; amount: number }> = {};
+        
+        for (const item of newMeasurements) {
+          totalAmount += item.amount;
+          totalConfidence += item.confidenceScore;
+          if (item.source === 'verified') verifiedCount++;
+          if (item.source === 'ai-estimated') aiEstimatedCount++;
+          
+          if (!categorySummary[item.category]) {
+            categorySummary[item.category] = { count: 0, amount: 0 };
+          }
+          categorySummary[item.category].count++;
+          categorySummary[item.category].amount += item.amount;
+        }
+        
+        return {
+          ...prev,
+          measurements: newMeasurements,
+          summary: {
+            ...prev.summary,
+            totalMeasurements: newMeasurements.length,
+            totalAmount,
+            verifiedCount,
+            aiEstimatedCount,
+            averageConfidence: newMeasurements.length > 0 ? totalConfidence / newMeasurements.length : 0,
+            categorySummary,
+          }
+        };
+      });
+    } catch (err) {
+      console.error('Failed to update measurement:', err);
+    }
+  };
 
   useEffect(() => {
     api.getProjects().then((data) => {
@@ -46,8 +101,8 @@ export default function MBookPage() {
   useEffect(() => {
     if (!selectedProject) return;
     setLoading(true);
-    api.getMBook(selectedProject)
-      .then(setMbookData)
+    api.getNyxen(selectedProject)
+      .then(setNyxenData)
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [selectedProject]);
@@ -55,7 +110,7 @@ export default function MBookPage() {
   const handleExport = async (format: 'json' | 'csv') => {
     if (!selectedProject) return;
     try {
-      const data = await api.exportMBook(selectedProject, format);
+      const data = await api.exportNyxen(selectedProject, format);
       const blob = new Blob(
         [format === 'csv' ? data : JSON.stringify(data, null, 2)],
         { type: format === 'csv' ? 'text/csv' : 'application/json' }
@@ -63,7 +118,7 @@ export default function MBookPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `MBook_${mbookData?.project.name || 'export'}.${format}`;
+      a.download = `Nyxen_${nyxenData?.project.name || 'export'}.${format}`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
@@ -74,7 +129,7 @@ export default function MBookPage() {
   const formatCurrency = (v: number) => '₹' + v.toLocaleString('en-IN');
 
   // Convert to MeasurementTable format
-  const tableMeasurements: Measurement[] = (mbookData?.measurements || []).map((m, i) => ({
+  const tableMeasurements: Measurement[] = (nyxenData?.measurements || []).map((m, i) => ({
     id: m.id,
     sno: i + 1,
     description: m.description,
@@ -119,39 +174,89 @@ export default function MBookPage() {
         </div>
       )}
 
-      {mbookData && !loading && (
+      {nyxenData && !loading && (
         <>
-          {/* MBook Header */}
-          <div className="mbook-view">
-            <div className="mbook-header">
-              <div className="mbook-header__title">
+          {/* Nyxen Header */}
+          <div className="nyxen-view">
+            <div className="nyxen-header">
+              <div className="nyxen-header__title">
                 MEASUREMENT BOOK
               </div>
               <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
                 (As per CPWD Works Manual 2019 — Form 23)
               </div>
-              <div className="mbook-header__meta">
-                <div className="mbook-header__meta-item">
-                  <span className="mbook-header__meta-label">Project:</span>
-                  <span>{mbookData.project.name}</span>
+              <div className="nyxen-header__meta">
+                <div className="nyxen-header__meta-item">
+                  <span className="nyxen-header__meta-label">Project:</span>
+                  <span>{nyxenData.project.name}</span>
                 </div>
-                <div className="mbook-header__meta-item">
-                  <span className="mbook-header__meta-label">Survey No:</span>
-                  <span>{mbookData.project.surveyNumber}</span>
+                <div className="nyxen-header__meta-item">
+                  <span className="nyxen-header__meta-label">Survey No:</span>
+                  <span>{nyxenData.project.surveyNumber}</span>
                 </div>
-                <div className="mbook-header__meta-item">
-                  <span className="mbook-header__meta-label">Contractor:</span>
-                  <span>{mbookData.project.contractor}</span>
+                <div className="nyxen-header__meta-item">
+                  <span className="nyxen-header__meta-label">Contractor:</span>
+                  <span>{nyxenData.project.contractor}</span>
                 </div>
-                <div className="mbook-header__meta-item">
-                  <span className="mbook-header__meta-label">Engineer:</span>
-                  <span>{mbookData.project.engineer}</span>
+                <div className="nyxen-header__meta-item">
+                  <span className="nyxen-header__meta-label">Engineer:</span>
+                  <span>{nyxenData.project.engineer}</span>
                 </div>
               </div>
             </div>
 
-            {/* Measurement Table */}
-            <MeasurementTable measurements={tableMeasurements} editable={false} />
+            {/* Role restriction banner */}
+            {(() => {
+              const role = appState.user?.role?.toLowerCase() || '';
+              if (role === 'supervisor') {
+                return (
+                  <div style={{
+                    padding: 'var(--space-sm) var(--space-md)',
+                    background: 'rgba(255, 171, 0, 0.1)',
+                    border: '1px solid rgba(255, 171, 0, 0.25)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--color-accent-amber)',
+                    fontSize: 'var(--font-size-sm)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--space-sm)',
+                    marginBottom: 'var(--space-md)',
+                  }}>
+                    🔒 Viewing as <strong>Supervisor</strong> — you can only add remarks, measurement values are read-only
+                  </div>
+                );
+              }
+              if (role === 'auditor') {
+                return (
+                  <div style={{
+                    padding: 'var(--space-sm) var(--space-md)',
+                    background: 'rgba(130, 177, 255, 0.1)',
+                    border: '1px solid rgba(130, 177, 255, 0.25)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--color-accent-blue)',
+                    fontSize: 'var(--font-size-sm)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--space-sm)',
+                    marginBottom: 'var(--space-md)',
+                  }}>
+                    👁️ Viewing as <strong>Auditor</strong> — read-only access
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            <MeasurementTable
+              measurements={tableMeasurements}
+              editable={(() => {
+                const role = appState.user?.role?.toLowerCase() || '';
+                if (role === 'admin' || role === 'engineer' || role === 'jr. engineer') return true;
+                if (role === 'supervisor') return 'remarks-only' as const;
+                return false;
+              })()}
+              onUpdate={handleUpdateEntry}
+            />
           </div>
 
           {/* Summary */}
@@ -160,25 +265,25 @@ export default function MBookPage() {
               <div className="flex-col" style={{ gap: 'var(--space-md)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)' }}>Total Entries</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{mbookData.summary.totalMeasurements}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{nyxenData.summary.totalMeasurements}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)' }}>Total Amount</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--color-accent-emerald)' }}>
-                    {formatCurrency(mbookData.summary.totalAmount)}
+                    {formatCurrency(nyxenData.summary.totalAmount)}
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)' }}>Verified</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{mbookData.summary.verifiedCount}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{nyxenData.summary.verifiedCount}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)' }}>AI Estimated</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{mbookData.summary.aiEstimatedCount}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{nyxenData.summary.aiEstimatedCount}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)' }}>Avg Confidence</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{Math.round(mbookData.summary.averageConfidence)}%</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{Math.round(nyxenData.summary.averageConfidence)}%</span>
                 </div>
               </div>
             </GlassCard>
@@ -186,7 +291,7 @@ export default function MBookPage() {
             {/* Category Breakdown */}
             <GlassCard title="Category Breakdown" icon={ChevronDown} iconColor="purple" style={{ gridColumn: 'span 2' }}>
               <div className="summary-grid">
-                {Object.entries(mbookData.summary.categorySummary).map(([cat, info]) => (
+                {Object.entries(nyxenData.summary.categorySummary).map(([cat, info]) => (
                   <div key={cat} className="summary-item">
                     <div className="summary-item__label">{cat}</div>
                     <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>

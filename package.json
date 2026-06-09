@@ -1,7 +1,7 @@
 {
-  "name": "mbook-ai-verification",
+  "name": "nyxen-ai-verification",
   "version": "1.0.0",
-  "description": "AI-Powered Construction MBook Verification & Auditing System",
+  "description": "AI-Powered Construction Nyxen Verification & Auditing System",
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
@@ -14,7 +14,7 @@
   "devDependencies": {
     "concurrently": "^8.2.2"
   },
-  "keywords": ["mbook", "construction", "verification", "audit", "photogrammetry", "gps"],
+  "keywords": ["nyxen", "construction", "verification", "audit", "photogrammetry", "gps"],
   "author": "NYXen Team",
   "license": "MIT"
 }

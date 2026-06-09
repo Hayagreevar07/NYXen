@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer } from 'react';
+import type { ReactNode } from 'react';
 
 export interface User {
   id: string;
@@ -66,7 +67,7 @@ interface AppState {
   projects: Project[];
   analysisResults: AnalysisResult[];
   sidebarOpen: boolean;
-  theme: 'dark';
+  theme: 'dark' | 'light';
 }
 
 type AppAction =
@@ -77,18 +78,19 @@ type AppAction =
   | { type: 'ADD_ANALYSIS_RESULT'; payload: AnalysisResult }
   | { type: 'TOGGLE_SIDEBAR' }
   | { type: 'SET_SIDEBAR'; payload: boolean }
+  | { type: 'TOGGLE_THEME' }
   | { type: 'LOGOUT' };
 
 const initialState: AppState = {
-  user: localStorage.getItem('mbook_user')
-    ? JSON.parse(localStorage.getItem('mbook_user')!)
+  user: localStorage.getItem('nyxen_user')
+    ? JSON.parse(localStorage.getItem('nyxen_user')!)
     : null,
-  isAuthenticated: !!localStorage.getItem('mbook_token'),
+  isAuthenticated: !!localStorage.getItem('nyxen_token'),
   currentProject: null,
   projects: [],
   analysisResults: [],
   sidebarOpen: false,
-  theme: 'dark',
+  theme: (localStorage.getItem('nyxen_theme') as 'dark' | 'light') || 'dark',
 };
 
 function appReducer(state: AppState, action: AppAction): AppState {
@@ -107,9 +109,15 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, sidebarOpen: !state.sidebarOpen };
     case 'SET_SIDEBAR':
       return { ...state, sidebarOpen: action.payload };
+    case 'TOGGLE_THEME': {
+      const newTheme = state.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('nyxen_theme', newTheme);
+      document.documentElement.setAttribute('data-theme', newTheme);
+      return { ...state, theme: newTheme };
+    }
     case 'LOGOUT':
-      localStorage.removeItem('mbook_token');
-      localStorage.removeItem('mbook_user');
+      localStorage.removeItem('nyxen_token');
+      localStorage.removeItem('nyxen_user');
       return { ...initialState, user: null, isAuthenticated: false };
     default:
       return state;
@@ -131,8 +139,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string) => {
     const { api } = await import('../services/api');
     const { token, user } = await api.login(username, password);
-    localStorage.setItem('mbook_token', token);
-    localStorage.setItem('mbook_user', JSON.stringify(user));
+    localStorage.setItem('nyxen_token', token);
+    localStorage.setItem('nyxen_user', JSON.stringify(user));
     dispatch({ type: 'SET_USER', payload: user });
     dispatch({ type: 'SET_AUTHENTICATED', payload: true });
   };

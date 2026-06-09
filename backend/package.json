@@ -1,7 +1,7 @@
 {
-  "name": "mbook-ai-backend",
+  "name": "nyxen-ai-backend",
   "version": "1.0.0",
-  "description": "AI-powered Construction MBook Verification & Auditing System - Backend",
+  "description": "AI-powered Construction Nyxen Verification & Auditing System - Backend",
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",

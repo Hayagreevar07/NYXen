@@ -9,6 +9,7 @@ import { MeasurementStore } from '../models/Measurement';
 import { AuditReportStore, AuditFinding } from '../models/AuditReport';
 import { MOCK_REGISTRY } from '../data/mockRegistry';
 import { validateCoordinates, detectSpoofing } from '../services/geoLocationService';
+import { requireRole } from '../middleware/rbac';
 
 const router = Router();
 
@@ -18,8 +19,10 @@ const router = Router();
  * - GPS validation against land registry
  * - Land registry cross-referencing
  * - Measurement accuracy and confidence scores
+ *
+ * Restricted to: Admin, Supervisor, Auditor (Jr. Engineer cannot generate)
  */
-router.get('/:projectId', (req: Request, res: Response) => {
+router.get('/:projectId', requireRole('Admin', 'Engineer', 'Supervisor', 'Auditor'), (req: Request, res: Response) => {
   try {
     const project = ProjectStore.getById(req.params.projectId);
     if (!project) {

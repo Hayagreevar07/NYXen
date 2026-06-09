@@ -44,8 +44,8 @@ export default function DashboardPage() {
 
   const quickActions = [
     { label: 'Image Analysis', icon: Camera, path: '/analysis' },
-    { label: 'GPS Verification', icon: MapPin, path: '/gps' },
-    { label: 'MBook Generator', icon: BookOpen, path: '/mbook' },
+    { label: 'GPS Data', icon: MapPin, path: '/gps' },
+    { label: 'Nyxen Generator', icon: BookOpen, path: '/nyxen' },
     { label: 'Audit Report', icon: Shield, path: '/audit' },
   ];
 
@@ -140,7 +140,7 @@ export default function DashboardPage() {
         <GlassCard title="Projects" subtitle={`${data.projects.total} total`} icon={Building2} iconColor="blue">
           <div className="flex-col" style={{ gap: 'var(--space-md)' }}>
             {data.projectSummaries.map((p) => (
-              <div key={p.id} className="project-card glass-card" style={{ padding: 'var(--space-md)' }} onClick={() => navigate('/mbook')}>
+              <div key={p.id} className="project-card glass-card" style={{ padding: 'var(--space-md)' }} onClick={() => navigate('/nyxen')}>
                 <div className="project-card__info">
                   <div className="project-card__name">{p.name}</div>
                   <div className="project-card__location">{p.location.substring(0, 50)}...</div>

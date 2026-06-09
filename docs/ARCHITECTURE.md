@@ -1,8 +1,8 @@
-# Architecture Documentation — MBook AI
+# Architecture Documentation — Nyxen AI
 
 ## System Overview
 
-MBook AI is a full-stack web application designed to automate and verify construction measurement books (MBooks) using AI-powered image analysis, GPS validation, and land registry cross-referencing.
+Nyxen AI is a full-stack web application designed to automate and verify construction measurement books (Nyxens) using AI-powered image analysis, GPS validation, and land registry cross-referencing.
 
 ## Architecture Diagram
 
@@ -20,7 +20,7 @@ MBook AI is a full-stack web application designed to automate and verify constru
 │  │  │Analysis │  │GPSMap    │  │ Auth Token Mgmt     │   │   │
 │  │  │GPS      │  │MetricCard│  │                     │   │   │
 │  │  │Registry │  │Gauge     │  │                     │   │   │
-│  │  │MBook    │  │Table     │  │                     │   │   │
+│  │  │Nyxen    │  │Table     │  │                     │   │   │
 │  │  │Audit    │  │Timeline  │  │                     │   │   │
 │  │  └─────────┘  └──────────┘  └───────────────────┘   │   │
 │  │                                                       │   │
@@ -44,7 +44,7 @@ MBook AI is a full-stack web application designed to automate and verify constru
 │  │  │ Morgan   │   │ /api/analysis → Image Analysis │     │   │
 │  │  │ Multer   │   │ /api/gps      → GPS Validation │     │   │
 │  │  │          │   │ /api/registry → Land Registry   │     │   │
-│  │  └──────────┘   │ /api/mbook    → MBook Gen      │     │   │
+│  │  └──────────┘   │ /api/nyxen    → Nyxen Gen      │     │   │
 │  │                  │ /api/audit    → Audit Reports   │     │   │
 │  │                  └──────────────────────────────┘     │   │
 │  │                                                       │   │
@@ -63,7 +63,7 @@ MBook AI is a full-stack web application designed to automate and verify constru
 │  │  │                         - Boundary retrieval   │    │   │
 │  │  │                         - Encumbrance check    │    │   │
 │  │  │                                               │    │   │
-│  │  │  mbookService           - CPWD format entries  │    │   │
+│  │  │  nyxenService           - CPWD format entries  │    │   │
 │  │  │                         - Quantity calculation  │    │   │
 │  │  │                         - BOQ generation       │    │   │
 │  │  │                                               │    │   │
@@ -121,14 +121,14 @@ MBook AI is a full-stack web application designed to automate and verify constru
 7. Frontend displays on GPSMap with boundary overlay
 ```
 
-### MBook Generation Flow
+### Nyxen Generation Flow
 ```
 1. AI analysis produces measurement estimates
 2. User reviews/edits measurements in MeasurementTable
-3. mbookService formats entries in CPWD format
+3. nyxenService formats entries in CPWD format
 4. Running account calculated across all visits
 5. Bill of Quantities cross-referenced
-6. MBook exported as JSON/CSV
+6. Nyxen exported as JSON/CSV
 ```
 
 ### Audit Report Flow

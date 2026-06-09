@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useApp } from './store/appStore';
 import DashboardLayout from './layouts/DashboardLayout';
@@ -7,7 +8,7 @@ import DashboardPage from './pages/DashboardPage';
 import AnalysisPage from './pages/AnalysisPage';
 import GPSPage from './pages/GPSPage';
 import RegistryPage from './pages/RegistryPage';
-import MBookPage from './pages/MBookPage';
+import NyxenPage from './pages/NyxenPage';
 import AuditPage from './pages/AuditPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -19,6 +20,12 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+  const { state } = useApp();
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', state.theme);
+  }, []);
+
   return (
     <Routes>
       {/* Public routes */}
@@ -37,7 +44,7 @@ function App() {
         <Route path="/analysis" element={<AnalysisPage />} />
         <Route path="/gps" element={<GPSPage />} />
         <Route path="/registry" element={<RegistryPage />} />
-        <Route path="/mbook" element={<MBookPage />} />
+        <Route path="/nyxen" element={<NyxenPage />} />
         <Route path="/audit" element={<AuditPage />} />
       </Route>
 

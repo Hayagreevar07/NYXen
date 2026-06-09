@@ -3,6 +3,7 @@ import { Shield, AlertTriangle, CheckCircle, MapPin, FileSearch, BarChart3, Info
 import GlassCard from '../components/GlassCard';
 import ConfidenceGauge from '../components/ConfidenceGauge';
 import { api } from '../services/api';
+import { useApp } from '../store/appStore';
 
 interface AuditData {
   id: string;
@@ -22,10 +23,14 @@ interface ProjectOption {
 }
 
 export default function AuditPage() {
+  const { state: appState } = useApp();
   const [projects, setProjects] = useState<ProjectOption[]>([]);
   const [selectedProject, setSelectedProject] = useState('');
   const [auditData, setAuditData] = useState<AuditData | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const userRole = appState.user?.role?.toLowerCase() || '';
+  const canGenerate = userRole !== 'jr. engineer';
 
   useEffect(() => {
     api.getProjects().then((data) => {
@@ -70,9 +75,22 @@ export default function AuditPage() {
             ))}
           </select>
         </div>
-        <button className="btn btn-primary" onClick={handleGenerate} disabled={loading}>
-          {loading ? <><div className="spinner" /> Generating...</> : <><Shield size={18} /> Generate Audit Report</>}
-        </button>
+        {canGenerate ? (
+          <button className="btn btn-primary" onClick={handleGenerate} disabled={loading}>
+            {loading ? <><div className="spinner" /> Generating...</> : <><Shield size={18} /> Generate Audit Report</>}
+          </button>
+        ) : (
+          <div style={{
+            padding: 'var(--space-sm) var(--space-md)',
+            background: 'rgba(255, 171, 0, 0.1)',
+            border: '1px solid rgba(255, 171, 0, 0.25)',
+            borderRadius: 'var(--radius-md)',
+            color: 'var(--color-accent-amber)',
+            fontSize: 'var(--font-size-sm)',
+          }}>
+            🔒 Jr. Engineers cannot generate audit reports — contact your Supervisor
+          </div>
+        )}
       </div>
 
       {loading && (

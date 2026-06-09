@@ -38,20 +38,10 @@ export default function LoginPage() {
 
       <div className="glass-card login-card">
         <div className="login-card__logo">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '8px' }}>
-            <div style={{
-              width: 48, height: 48,
-              background: 'var(--gradient-primary)',
-              borderRadius: 'var(--radius-md)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Building2 size={24} color="#fff" />
-            </div>
+          <div style={{ width: 80, height: 80, margin: '0 auto var(--space-md)' }}>
+            <img src="/logo.png" alt="Nyxen" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 'var(--radius-md)' }} />
           </div>
-          <div className="login-card__logo-text">MBook AI</div>
-          <p style={{ color: 'var(--color-text-tertiary)', fontSize: 'var(--font-size-sm)', marginTop: '4px' }}>
-            Construction Verification System
-          </p>
+          <div className="login-card__logo-text">Nyxen</div>
         </div>
 
         <form className="login-card__form" onSubmit={handleSubmit}>
@@ -123,7 +113,12 @@ export default function LoginPage() {
 
         <div className="login-card__hint" style={{ marginTop: 'var(--space-lg)' }}>
           <div style={{ fontWeight: 600, marginBottom: '6px' }}>Demo Credentials</div>
-          <div>admin / admin123 · engineer / eng123 · auditor / audit123</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: 'var(--font-size-xs)' }}>
+            <span><strong>admin</strong> / admin123 — <em>Full access</em></span>
+            <span><strong>jrengineer</strong> / jre123 — <em>Edit Nyxen, no audit</em></span>
+            <span><strong>supervisor</strong> / super123 — <em>Remarks only</em></span>
+            <span><strong>auditor</strong> / audit123 — <em>Read-only</em></span>
+          </div>
         </div>
       </div>
     </div>

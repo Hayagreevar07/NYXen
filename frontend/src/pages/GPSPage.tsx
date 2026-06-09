@@ -1,8 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, Search, Shield, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import GlassCard from '../components/GlassCard';
 import ConfidenceGauge from '../components/ConfidenceGauge';
 import { api } from '../services/api';
+
+// Fix default marker icon issue with bundlers
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
+
+/** Helper component to recenter the map when coordinates change */
+function RecenterMap({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo([lat, lng], 15, { duration: 1.5 });
+  }, [lat, lng, map]);
+  return null;
+}
 
 interface GPSResult {
   coordinates: { latitude: number; longitude: number };
@@ -97,28 +117,34 @@ export default function GPSPage() {
           )}
         </GlassCard>
 
-        {/* Map Placeholder */}
+        {/* Real Map */}
         <GlassCard title="Location Map" subtitle={result ? result.location.address : 'Enter coordinates to view'} icon={MapPin} iconColor="blue">
-          <div className="map-container" style={{ height: 350, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-tertiary)' }}>
-            {result ? (
-              <div style={{ textAlign: 'center' }}>
-                <MapPin size={48} style={{ color: 'var(--color-accent-blue)', marginBottom: 'var(--space-md)' }} />
-                <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600 }}>
-                  {result.coordinates.latitude.toFixed(6)}°N, {result.coordinates.longitude.toFixed(6)}°E
-                </div>
-                <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
-                  {result.location.address}
-                </div>
-                <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-tertiary)', marginTop: '4px' }}>
-                  {result.location.city}, {result.location.state}
-                </div>
-              </div>
-            ) : (
-              <div style={{ color: 'var(--color-text-tertiary)' }}>
-                <MapPin size={48} style={{ opacity: 0.3, margin: '0 auto var(--space-md)' }} />
-                <p>Enter coordinates and verify to see location</p>
-              </div>
-            )}
+          <div className="map-container" style={{ height: 350 }}>
+            <MapContainer
+              center={[parseFloat(lat) || 12.925, parseFloat(lng) || 77.5838]}
+              zoom={14}
+              style={{ height: '100%', width: '100%' }}
+              scrollWheelZoom={true}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              {result && (
+                <>
+                  <RecenterMap lat={result.coordinates.latitude} lng={result.coordinates.longitude} />
+                  <Marker position={[result.coordinates.latitude, result.coordinates.longitude]}>
+                    <Popup>
+                      <div style={{ color: '#333', fontSize: '13px' }}>
+                        <strong>{result.location.address}</strong><br />
+                        {result.coordinates.latitude.toFixed(6)}°N, {result.coordinates.longitude.toFixed(6)}°E<br />
+                        <em>{result.location.city}, {result.location.state}</em>
+                      </div>
+                    </Popup>
+                  </Marker>
+                </>
+              )}
+            </MapContainer>
           </div>
         </GlassCard>
       </div>

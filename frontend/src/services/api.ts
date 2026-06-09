@@ -1,4 +1,7 @@
-const API_BASE_URL = 'http://localhost:3001/api';
+const isNative = window.hasOwnProperty('Capacitor') || (window as any).Capacitor;
+const API_BASE_URL = isNative 
+  ? 'http://10.0.2.2:3001/api' 
+  : `http://${window.location.hostname}:3001/api`;
 
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem('nyxen_token');

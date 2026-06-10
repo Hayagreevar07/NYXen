@@ -180,7 +180,7 @@ NYXen/
 
 ## 🤝 Contributing
 
-1. Pull the latest changes: `git pull origin main`
+1. Pull the latest changes: `git pull origin rat-1`
 2. Create a feature branch: `git checkout -b feature/your-feature`
 3. Make your changes
 4. Commit with meaningful messages: `git commit -m "feat: add GPS validation"`

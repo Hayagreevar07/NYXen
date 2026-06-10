@@ -51,11 +51,11 @@ export const api = {
     return handleResponse<any>(res);
   },
 
-  async analyzeImages(imageIds: string[]) {
+  async analyzeImages(imageIds: string[], projectId?: string, modelPreference?: 'local' | 'gemini') {
     const res = await fetch(`${API_BASE_URL}/analysis/analyze`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ imageIds }),
+      body: JSON.stringify({ imageIds, projectId, modelPreference }),
     });
     return handleResponse<any>(res);
   },

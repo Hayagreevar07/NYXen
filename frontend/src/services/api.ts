@@ -1,6 +1,11 @@
 const isNative = window.hasOwnProperty('Capacitor') || (window as any).Capacitor;
-const API_BASE_URL = isNative 
-  ? 'http://10.0.2.2:3001/api' 
+
+// For native (Capacitor) apps, use the dev machine's LAN IP so both
+// emulators and physical devices on the same network can reach the backend.
+// For the web version, derive the URL from the current browser hostname.
+const DEV_MACHINE_IP = '10.175.4.117';
+const API_BASE_URL = isNative
+  ? `http://${DEV_MACHINE_IP}:3001/api`
   : `http://${window.location.hostname}:3001/api`;
 
 function getAuthHeaders(): Record<string, string> {

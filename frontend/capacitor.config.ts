@@ -5,8 +5,10 @@ const config: CapacitorConfig = {
   appName: 'Nyxen',
   webDir: 'dist',
   server: {
-    androidScheme: 'https'
-  }
+    androidScheme: 'https',
+    cleartext: true,
+    allowNavigation: ['10.175.4.117:3001', 'localhost:3001', '10.0.2.2:3001'],
+  },
 };
 
 export default config;

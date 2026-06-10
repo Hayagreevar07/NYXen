@@ -41,7 +41,9 @@ app.use(cors({
     'http://127.0.0.1:5174',
     'http://localhost',
     'https://localhost',
-    'capacitor://localhost'
+    'capacitor://localhost',
+    'http://10.175.4.117:5173',
+    'http://10.175.4.117:3001',
   ],
   credentials: true,
 }));

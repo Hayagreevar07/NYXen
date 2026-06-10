@@ -33,6 +33,9 @@ export const ENV = {
 
   /** Default geofence radius in kilometers for parcel boundary checks */
   GEOFENCE_RADIUS_KM: parseFloat(process.env.GEOFENCE_RADIUS_KM || '0.5'),
+
+  /** Google Gemini API Key for Vision Analysis */
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
 };
 
 export default ENV;

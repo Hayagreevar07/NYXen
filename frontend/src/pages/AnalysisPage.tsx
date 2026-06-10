@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Camera, Cpu, Check, AlertTriangle, Layers } from 'lucide-react';
 import GlassCard from '../components/GlassCard';
 import ImageUploader from '../components/ImageUploader';
@@ -52,6 +52,18 @@ export default function AnalysisPage() {
   const [stage, setStage] = useState<Stage>('upload');
   const [results, setResults] = useState<AnalysisResult[]>([]);
   const [error, setError] = useState('');
+  const [projects, setProjects] = useState<any[]>([]);
+  const [selectedProject, setSelectedProject] = useState<string>('');
+  const [modelPreference, setModelPreference] = useState<'local' | 'gemini'>('gemini');
+
+  useEffect(() => {
+    api.getProjects().then((data) => {
+      setProjects(data);
+      if (data.length > 0) {
+        setSelectedProject(data[0].id);
+      }
+    }).catch(console.error);
+  }, []);
 
   const userRole = appState.user?.role?.toLowerCase() || '';
   const canUpload = ['admin', 'engineer', 'jr. engineer'].includes(userRole);
@@ -77,7 +89,7 @@ export default function AnalysisPage() {
       // Stage 2: Analyze
       setStage('analyzing');
       const imageIds = uploadResult.uploaded.map((u: any) => u.id);
-      const analysisResult = await api.analyzeImages(imageIds);
+      const analysisResult = await api.analyzeImages(imageIds, selectedProject, modelPreference);
 
       setResults(analysisResult.results || []);
       setStage('complete');
@@ -95,7 +107,7 @@ export default function AnalysisPage() {
       setStage('analyzing');
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const analysisResult = await api.analyzeImages([presetId]);
+      const analysisResult = await api.analyzeImages([presetId], selectedProject, modelPreference);
 
       setResults(analysisResult.results || []);
       setStage('complete');
@@ -168,10 +180,41 @@ export default function AnalysisPage() {
         <GlassCard title="Upload Site Photos" subtitle="Drag & drop construction site images" icon={Camera} iconColor="blue">
           {canUpload ? (
             <>
+              <div style={{ display: 'flex', gap: 'var(--space-lg)', marginBottom: 'var(--space-md)', flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: '250px' }}>
+                  <label style={{ display: 'block', fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>
+                    Select Project to Map Measurements
+                  </label>
+                  <select 
+                    className="select" 
+                    value={selectedProject} 
+                    onChange={(e) => setSelectedProject(e.target.value)}
+                    style={{ width: '100%' }}
+                  >
+                    {projects.map((p) => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ flex: 1, minWidth: '250px' }}>
+                  <label style={{ display: 'block', fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>
+                    Analysis Engine
+                  </label>
+                  <select 
+                    className="select" 
+                    value={modelPreference} 
+                    onChange={(e) => setModelPreference(e.target.value as 'local' | 'gemini')}
+                    style={{ width: '100%' }}
+                  >
+                    <option value="gemini">Cloud AI (Gemini 1.5 - High Accuracy)</option>
+                    <option value="local">Local AI (YOLOv8 - Fast Offline)</option>
+                  </select>
+                </div>
+              </div>
               <ImageUploader onFilesSelected={setFiles} maxFiles={10} />
               {files.length > 0 && (
                 <div style={{ marginTop: 'var(--space-xl)', textAlign: 'right' }}>
-                  <button className="btn btn-primary" onClick={handleAnalyze}>
+                  <button className="btn btn-primary" onClick={handleAnalyze} disabled={!selectedProject}>
                     <Cpu size={18} /> Analyze {files.length} Image{files.length > 1 ? 's' : ''}
                   </button>
                 </div>

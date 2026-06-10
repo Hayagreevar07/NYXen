@@ -14,6 +14,7 @@
 
 import sharp from 'sharp';
 import exifr from 'exifr';
+import * as yoloService from './yoloInferenceService';
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -341,13 +342,51 @@ export async function analyzeConstructionElements(
     else if (imgWidth >= 1280 && avgContrast > 20) imageQuality = 'fair';
     else imageQuality = 'poor';
 
-    // Generate simulated detected elements based on scene type
-    const elements: DetectedElement[] = generateSimulatedElements(
-      imgWidth,
-      imgHeight,
-      sceneType,
-      seed
-    );
+    // REAL AI DETECTIONS VIA YOLOv8
+    let elements: DetectedElement[] = [];
+    try {
+      const yoloBoxes = await yoloService.detectObjects(imageBuffer);
+      
+      // Convert YOLO output (640x640 scale) back to original image dimensions
+      elements = yoloBoxes.map(box => {
+        // YOLO outputs center x, y, w, h
+        const x_px = Math.round((box.x - box.w / 2) / 640 * imgWidth);
+        const y_px = Math.round((box.y - box.h / 2) / 640 * imgHeight);
+        const w_px = Math.round((box.w) / 640 * imgWidth);
+        const h_px = Math.round((box.h) / 640 * imgHeight);
+        
+        // Estimate depth heuristically for quantity calculation
+        const estimatedDimensions = {
+          length: Math.round((w_px / imgWidth) * 10 * 10) / 10,
+          width: Math.round((w_px / imgWidth) * 3 * 10) / 10,
+          height: Math.round((h_px / imgHeight) * 5 * 10) / 10
+        };
+
+        return {
+          type: box.className as any,
+          confidence: Math.round(box.confidence * 100),
+          boundingBox: [x_px, y_px, w_px, h_px],
+          estimatedDimensions,
+          material: 'AI Detected Material'
+        };
+      });
+      
+      if (elements.length > 0) {
+        console.log(`🧠 AI successfully detected ${elements.length} real construction elements!`);
+      }
+    } catch (e) {
+      console.warn("⚠️ YOLO AI failed or is unavailable. Falling back to simulation.", e);
+    }
+    
+    // Fallback if AI finds absolutely nothing (e.g., empty image or model error)
+    if (elements.length === 0) {
+      elements = generateSimulatedElements(
+        imgWidth,
+        imgHeight,
+        sceneType,
+        seed
+      );
+    }
 
     return {
       imageWidth: imgWidth,

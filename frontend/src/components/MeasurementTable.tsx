@@ -94,10 +94,17 @@ export default function MeasurementTable({
             <th>L (m)</th>
             <th>B (m)</th>
             <th>D/H (m)</th>
+            <th onClick={() => handleSort('aiQuantity')} style={{ cursor: 'pointer' }}>
+              AI Qty <SortIcon field="aiQuantity" />
+            </th>
+            <th onClick={() => handleSort('manualQuantity')} style={{ cursor: 'pointer' }}>
+              Manual Qty <SortIcon field="manualQuantity" />
+            </th>
             <th onClick={() => handleSort('quantity')} style={{ cursor: 'pointer' }}>
-              Quantity <SortIcon field="quantity" />
+              Final Qty <SortIcon field="quantity" />
             </th>
             <th>Unit</th>
+            <th>Materials</th>
             {measurements.some(m => m.rate) && <th>Rate (₹)</th>}
             {measurements.some(m => m.amount) && <th>Amount (₹)</th>}
             <th onClick={() => handleSort('confidence')} style={{ cursor: 'pointer' }}>
@@ -108,6 +115,7 @@ export default function MeasurementTable({
         </thead>
         <tbody>
           {sorted.map((m) => (
+          <>
             <tr
               key={m.id}
               style={{
@@ -187,11 +195,40 @@ export default function MeasurementTable({
                   m.depthOrHeight.toFixed(2)
                 )}
               </td>
+              <td className="measurement-value">
+                {m.aiQuantity ? m.aiQuantity.toFixed(2) : '—'}
+              </td>
+              <td className="measurement-value">
+                {editable ? (
+                  <input
+                    className="input"
+                    type="number"
+                    style={{ padding: '4px 8px', width: '70px', fontSize: 'var(--font-size-sm)', fontFamily: 'var(--font-mono)', background: 'transparent', border: '1px solid transparent' }}
+                    defaultValue={m.manualQuantity || m.quantity}
+                    onBlur={(e) => handleCellChange(m.id, 'manualQuantity', e.target.value)}
+                  />
+                ) : (
+                  (m.manualQuantity || m.quantity).toFixed(2)
+                )}
+              </td>
               <td className="measurement-value" style={{ fontWeight: 600 }}>
                 {m.quantity.toFixed(2)}
               </td>
               <td style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-tertiary)' }}>
                 {m.unit}
+              </td>
+              <td style={{ fontSize: 'var(--font-size-xs)' }}>
+                {m.materialsCheck ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span>{m.materialsCheck.materialUsed}</span>
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <span style={{ color: m.materialsCheck.engineerVerified ? 'var(--color-accent-emerald)' : 'var(--color-text-tertiary)' }}>Eng: {m.materialsCheck.engineerVerified ? '✓' : '✗'}</span>
+                      <span style={{ color: m.materialsCheck.constructorVerified ? 'var(--color-accent-emerald)' : 'var(--color-text-tertiary)' }}>Con: {m.materialsCheck.constructorVerified ? '✓' : '✗'}</span>
+                    </div>
+                  </div>
+                ) : (
+                  '—'
+                )}
               </td>
               {measurements.some(x => x.rate) && (
                 <td className="measurement-value">
@@ -250,6 +287,14 @@ export default function MeasurementTable({
                 </td>
               )}
             </tr>
+            {m.violationWarning && (
+              <tr key={`${m.id}-warning`}>
+                <td colSpan={14} style={{ padding: '8px 16px', background: 'rgba(255, 68, 68, 0.1)', color: 'var(--color-accent-red)', fontSize: 'var(--font-size-sm)' }}>
+                  ⚠️ <strong>Contract Violation:</strong> {m.violationWarning}
+                </td>
+              </tr>
+            )}
+          </>
           ))}
         </tbody>
         <tfoot>

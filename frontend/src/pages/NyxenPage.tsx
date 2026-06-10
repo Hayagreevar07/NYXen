@@ -15,12 +15,17 @@ interface NyxenData {
   project: {
     id: string; name: string; contractor: string; engineer: string;
     location: { lat: number; lng: number; address: string }; surveyNumber: string;
+    contractorDetails?: { licenseNumber: string; contactPerson: string; phone: string; };
+    agreement?: { agreementNumber: string; dateOfAgreement: string; approvedMaterials: string[]; blueprintDimensions: Record<string, number> };
   };
   measurements: Array<{
     id: string; itemCode: string; description: string; category: string;
     location: string; number: number; length: number; breadth: number;
     depth: number; quantity: number; unit: string; rate: number; amount: number;
     confidenceScore: number; source: string;
+    aiDimensions?: { quantity: number; }; manualDimensions?: { quantity: number; };
+    materialsCheck?: { materialUsed: string; engineerVerified: boolean; constructorVerified: boolean; };
+    violationWarning?: string | null;
   }>;
   summary: {
     totalMeasurements: number; totalAmount: number; verifiedCount: number;
@@ -139,10 +144,14 @@ export default function NyxenPage() {
     breadth: m.breadth,
     depthOrHeight: m.depth,
     quantity: m.quantity,
+    aiQuantity: m.aiDimensions?.quantity,
+    manualQuantity: m.manualDimensions?.quantity,
     unit: m.unit,
     confidence: m.confidenceScore,
     rate: m.rate,
     amount: m.amount,
+    materialsCheck: m.materialsCheck,
+    violationWarning: m.violationWarning,
   }));
 
   return (
@@ -185,7 +194,7 @@ export default function NyxenPage() {
               <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
                 (As per CPWD Works Manual 2019 — Form 23)
               </div>
-              <div className="nyxen-header__meta">
+              <div className="nyxen-header__meta" style={{ marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px' }}>
                 <div className="nyxen-header__meta-item">
                   <span className="nyxen-header__meta-label">Project:</span>
                   <span>{nyxenData.project.name}</span>
@@ -194,14 +203,47 @@ export default function NyxenPage() {
                   <span className="nyxen-header__meta-label">Survey No:</span>
                   <span>{nyxenData.project.surveyNumber}</span>
                 </div>
-                <div className="nyxen-header__meta-item">
-                  <span className="nyxen-header__meta-label">Contractor:</span>
-                  <span>{nyxenData.project.contractor}</span>
-                </div>
+                
+                {nyxenData.project.agreement && (
+                  <>
+                    <div className="nyxen-header__meta-item">
+                      <span className="nyxen-header__meta-label">Agreement No:</span>
+                      <span style={{ color: 'var(--color-accent-amber)' }}>{nyxenData.project.agreement.agreementNumber}</span>
+                    </div>
+                    <div className="nyxen-header__meta-item">
+                      <span className="nyxen-header__meta-label">Agreement Date:</span>
+                      <span>{new Date(nyxenData.project.agreement.dateOfAgreement).toLocaleDateString()}</span>
+                    </div>
+                  </>
+                )}
+                
                 <div className="nyxen-header__meta-item">
                   <span className="nyxen-header__meta-label">Engineer:</span>
                   <span>{nyxenData.project.engineer}</span>
                 </div>
+              </div>
+
+              <div className="nyxen-header__meta" style={{ marginTop: '16px', background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px' }}>
+                <div className="nyxen-header__meta-item" style={{ width: '100%' }}>
+                  <span className="nyxen-header__meta-label">Contractor:</span>
+                  <span style={{ fontWeight: 600 }}>{nyxenData.project.contractor}</span>
+                </div>
+                {nyxenData.project.contractorDetails && (
+                  <>
+                    <div className="nyxen-header__meta-item">
+                      <span className="nyxen-header__meta-label">License:</span>
+                      <span>{nyxenData.project.contractorDetails.licenseNumber}</span>
+                    </div>
+                    <div className="nyxen-header__meta-item">
+                      <span className="nyxen-header__meta-label">Contact:</span>
+                      <span>{nyxenData.project.contractorDetails.contactPerson}</span>
+                    </div>
+                    <div className="nyxen-header__meta-item">
+                      <span className="nyxen-header__meta-label">Phone:</span>
+                      <span>{nyxenData.project.contractorDetails.phone}</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 

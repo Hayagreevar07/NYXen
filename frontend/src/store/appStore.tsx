@@ -53,11 +53,26 @@ export interface Measurement {
   length: number;
   breadth: number;
   depthOrHeight: number;
-  quantity: number;
+  quantity: number; // Final resolved quantity
+  
+  // Dual measurement tracking
+  aiQuantity?: number;
+  manualQuantity?: number;
+
   unit: string;
   confidence: number;
   rate?: number;
   amount?: number;
+
+  // Material Verification
+  materialsCheck?: {
+    materialUsed: string;
+    engineerVerified: boolean;
+    constructorVerified: boolean;
+  };
+
+  // Contract Violation
+  violationWarning?: string | null;
 }
 
 interface AppState {

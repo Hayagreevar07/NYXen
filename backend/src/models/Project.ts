@@ -29,6 +29,19 @@ export interface Project {
   };
   /** Contractor company/individual name */
   contractor: string;
+  /** Detailed Contractor Information */
+  contractorDetails?: {
+    licenseNumber: string;
+    contactPerson: string;
+    phone: string;
+  };
+  /** Contract Agreement Information */
+  agreement?: {
+    agreementNumber: string;
+    dateOfAgreement: string;
+    approvedMaterials: string[];
+    blueprintDimensions: Record<string, number>; // itemCode mapped to max expected quantity
+  };
   /** Supervising engineer name and qualifications */
   engineer: string;
   /** Current project status */

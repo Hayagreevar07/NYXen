@@ -23,6 +23,20 @@ export const SAMPLE_PROJECTS: Project[] = [
       address: '45th Cross, 9th Main, Jayanagar 4th Block, Bangalore - 560041',
     },
     contractor: 'Prestige Construction Pvt Ltd',
+    contractorDetails: {
+      licenseNumber: 'KA-PC-2023-8891',
+      contactPerson: 'Mr. Rajesh Kumar',
+      phone: '+91-9876543210'
+    },
+    agreement: {
+      agreementNumber: 'AGR/2024/001',
+      dateOfAgreement: '2024-11-01',
+      approvedMaterials: ['OPC 43 grade', 'TMT Fe-500D', 'Local Sand', 'River Sand'],
+      blueprintDimensions: {
+        '2.1.1': 1500.0, // Earthwork max
+        '4.1.8': 250.0   // Concrete max (we'll make measurement exceed this to show warning)
+      }
+    },
     engineer: 'Ar. Vikram Reddy, M.Tech (Structural)',
     status: 'in-progress',
     startDate: '2025-03-15',
@@ -139,11 +153,18 @@ export const SAMPLE_MEASUREMENTS: Measurement[] = [
     breadth: 12.0,
     depth: 2.5,
     quantity: 1350.0,
+    aiDimensions: { length: 45.0, breadth: 12.0, depth: 2.5, quantity: 1345.5 },
+    manualDimensions: { length: 45.0, breadth: 12.0, depth: 2.5, quantity: 1350.0 },
     unit: 'Cum',
     rate: 285.0,
     amount: 384750.0,
     confidenceScore: 92,
     source: 'verified',
+    materialsCheck: {
+      materialUsed: 'Local Sand',
+      engineerVerified: true,
+      constructorVerified: true
+    },
     images: [],
     gpsData: { lat: 12.9248, lng: 77.5836, accuracy: 3.5, timestamp: '2025-04-10T09:30:00Z' },
     recordedBy: 'engineer',
@@ -162,11 +183,19 @@ export const SAMPLE_MEASUREMENTS: Measurement[] = [
     breadth: 11.0,
     depth: 0.6,
     quantity: 277.2,
+    aiDimensions: { length: 42.0, breadth: 11.0, depth: 0.6, quantity: 277.2 },
+    manualDimensions: { length: 42.0, breadth: 11.0, depth: 0.6, quantity: 277.2 },
     unit: 'Cum',
     rate: 7450.0,
     amount: 2065140.0,
     confidenceScore: 88,
     source: 'ai-estimated',
+    materialsCheck: {
+      materialUsed: 'OPC 33 grade', // Unauthorized material to trigger warning
+      engineerVerified: false,
+      constructorVerified: true
+    },
+    violationWarning: "Unauthorized material: 'OPC 33 grade' is not in the approved contract list. | Blueprint exceeded: Total quantity (277.2) exceeds contracted amount (250) for item 4.1.8.",
     images: [],
     gpsData: { lat: 12.9249, lng: 77.5837, accuracy: 4.0, timestamp: '2025-05-15T10:00:00Z' },
     recordedBy: 'engineer',

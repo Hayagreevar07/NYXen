@@ -14,12 +14,17 @@ interface MBookData {
   project: {
     id: string; name: string; contractor: string; engineer: string;
     location: { lat: number; lng: number; address: string }; surveyNumber: string;
+    contractorDetails?: { licenseNumber: string; contactPerson: string; phone: string; };
+    agreement?: { agreementNumber: string; dateOfAgreement: string; approvedMaterials: string[]; blueprintDimensions: Record<string, number> };
   };
   measurements: Array<{
     id: string; itemCode: string; description: string; category: string;
     location: string; number: number; length: number; breadth: number;
     depth: number; quantity: number; unit: string; rate: number; amount: number;
     confidenceScore: number; source: string;
+    aiDimensions?: { quantity: number; }; manualDimensions?: { quantity: number; };
+    materialsCheck?: { materialUsed: string; engineerVerified: boolean; constructorVerified: boolean; };
+    violationWarning?: string | null;
   }>;
   summary: {
     totalMeasurements: number; totalAmount: number; verifiedCount: number;
@@ -84,10 +89,14 @@ export default function MBookPage() {
     breadth: m.breadth,
     depthOrHeight: m.depth,
     quantity: m.quantity,
+    aiQuantity: m.aiDimensions?.quantity,
+    manualQuantity: m.manualDimensions?.quantity,
     unit: m.unit,
     confidence: m.confidenceScore,
     rate: m.rate,
     amount: m.amount,
+    materialsCheck: m.materialsCheck,
+    violationWarning: m.violationWarning,
   }));
 
   return (
@@ -130,7 +139,8 @@ export default function MBookPage() {
               <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
                 (As per CPWD Works Manual 2019 — Form 23)
               </div>
-              <div className="mbook-header__meta">
+              
+              <div className="mbook-header__meta" style={{ marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px' }}>
                 <div className="mbook-header__meta-item">
                   <span className="mbook-header__meta-label">Project:</span>
                   <span>{mbookData.project.name}</span>
@@ -139,14 +149,47 @@ export default function MBookPage() {
                   <span className="mbook-header__meta-label">Survey No:</span>
                   <span>{mbookData.project.surveyNumber}</span>
                 </div>
-                <div className="mbook-header__meta-item">
-                  <span className="mbook-header__meta-label">Contractor:</span>
-                  <span>{mbookData.project.contractor}</span>
-                </div>
+                
+                {mbookData.project.agreement && (
+                  <>
+                    <div className="mbook-header__meta-item">
+                      <span className="mbook-header__meta-label">Agreement No:</span>
+                      <span style={{ color: 'var(--color-accent-amber)' }}>{mbookData.project.agreement.agreementNumber}</span>
+                    </div>
+                    <div className="mbook-header__meta-item">
+                      <span className="mbook-header__meta-label">Agreement Date:</span>
+                      <span>{new Date(mbookData.project.agreement.dateOfAgreement).toLocaleDateString()}</span>
+                    </div>
+                  </>
+                )}
+                
                 <div className="mbook-header__meta-item">
                   <span className="mbook-header__meta-label">Engineer:</span>
                   <span>{mbookData.project.engineer}</span>
                 </div>
+              </div>
+
+              <div className="mbook-header__meta" style={{ marginTop: '16px', background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px' }}>
+                <div className="mbook-header__meta-item" style={{ width: '100%' }}>
+                  <span className="mbook-header__meta-label">Contractor:</span>
+                  <span style={{ fontWeight: 600 }}>{mbookData.project.contractor}</span>
+                </div>
+                {mbookData.project.contractorDetails && (
+                  <>
+                    <div className="mbook-header__meta-item">
+                      <span className="mbook-header__meta-label">License:</span>
+                      <span>{mbookData.project.contractorDetails.licenseNumber}</span>
+                    </div>
+                    <div className="mbook-header__meta-item">
+                      <span className="mbook-header__meta-label">Contact:</span>
+                      <span>{mbookData.project.contractorDetails.contactPerson}</span>
+                    </div>
+                    <div className="mbook-header__meta-item">
+                      <span className="mbook-header__meta-label">Phone:</span>
+                      <span>{mbookData.project.contractorDetails.phone}</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 

@@ -44,26 +44,55 @@ export interface Measurement {
     | 'electrical';
   /** Location within the project site where measurement was taken */
   location: string;
+  
   /** Number of similar items (multiplier) */
   number: number;
-  /** Length in metres */
+  
+  // -- Dual Measurements Support --
+  /** AI-derived dimensions */
+  aiDimensions?: {
+    length: number;
+    breadth: number;
+    depth: number;
+    quantity: number;
+  };
+  
+  /** Manually verified/recorded dimensions */
+  manualDimensions?: {
+    length: number;
+    breadth: number;
+    depth: number;
+    quantity: number;
+  };
+  
+  // Legacy fields (kept for backward compatibility during migration)
   length: number;
-  /** Breadth/width in metres */
   breadth: number;
-  /** Depth/height in metres */
   depth: number;
-  /** Calculated quantity (Number × L × B × D, or directly specified) */
   quantity: number;
+
   /** Unit of measurement */
   unit: 'Cum' | 'Sqm' | 'Rmt' | 'Kg' | 'Nos' | 'LS';
   /** Rate per unit in INR (from DSR or negotiated) */
   rate: number;
-  /** Total amount = Quantity × Rate, in INR */
+  /** Total amount = final quantity × Rate, in INR */
   amount: number;
+  
   /** AI confidence score (0-100) for estimated measurements */
   confidenceScore: number;
   /** Source/method of measurement */
   source: 'ai-estimated' | 'manual' | 'verified';
+  
+  // -- Material Verification --
+  materialsCheck?: {
+    materialUsed: string;
+    engineerVerified: boolean;
+    constructorVerified: boolean;
+  };
+  
+  // -- Contract Violation Warning --
+  violationWarning?: string | null;
+
   /** Associated image file paths */
   images: string[];
   /** GPS data from where the measurement was recorded */
@@ -136,6 +165,44 @@ export class MeasurementStore {
   }
 
   /**
+   * Run contract validation logic against the Project's agreement details.
+   */
+  private static validateAgainstContract(measurement: Measurement): string | null {
+    // Cannot validate without ProjectStore, require inline to avoid top-level circular dep just in case
+    const { ProjectStore } = require('./Project');
+    const project = ProjectStore.getById(measurement.projectId);
+    
+    if (!project || !project.agreement) return null;
+    
+    const warnings: string[] = [];
+    const agreement = project.agreement;
+
+    // 1. Check material verification
+    if (measurement.materialsCheck && measurement.materialsCheck.materialUsed) {
+      if (!agreement.approvedMaterials.includes(measurement.materialsCheck.materialUsed)) {
+        warnings.push(`Unauthorized material: '${measurement.materialsCheck.materialUsed}' is not in the approved contract list.`);
+      }
+    }
+
+    // 2. Check blueprint quantity limits
+    if (agreement.blueprintDimensions && agreement.blueprintDimensions[measurement.itemCode] !== undefined) {
+      const maxQuantity = agreement.blueprintDimensions[measurement.itemCode];
+      
+      // Calculate total quantity for this item code across the project
+      const allMeasurements = this.getByProjectId(measurement.projectId);
+      const currentTotal = allMeasurements
+        .filter(m => m.itemCode === measurement.itemCode && m.id !== measurement.id)
+        .reduce((sum, m) => sum + m.quantity, 0);
+        
+      if (currentTotal + measurement.quantity > maxQuantity) {
+        warnings.push(`Blueprint exceeded: Total quantity (${currentTotal + measurement.quantity}) exceeds contracted amount (${maxQuantity}) for item ${measurement.itemCode}.`);
+      }
+    }
+
+    return warnings.length > 0 ? warnings.join(' | ') : null;
+  }
+
+  /**
    * Create a new measurement entry.
    * Automatically calculates quantity and amount if not provided.
    */
@@ -145,16 +212,21 @@ export class MeasurementStore {
     // Auto-calculate quantity if zero (using CPWD formula: N × L × B × D)
     let quantity = data.quantity;
     if (quantity === 0 && data.number > 0) {
+      // Prioritize manual dimensions if provided, else fallback to standard length/breadth/depth
+      const l = data.manualDimensions?.length || data.length;
+      const b = data.manualDimensions?.breadth || data.breadth;
+      const d = data.manualDimensions?.depth || data.depth;
+      
       if (data.unit === 'Cum') {
-        quantity = data.number * data.length * data.breadth * data.depth;
+        quantity = data.number * l * b * d;
       } else if (data.unit === 'Sqm') {
-        quantity = data.number * data.length * data.breadth;
+        quantity = data.number * l * b;
       } else if (data.unit === 'Rmt') {
-        quantity = data.number * data.length;
+        quantity = data.number * l;
       } else if (data.unit === 'Nos') {
         quantity = data.number;
       } else if (data.unit === 'Kg') {
-        quantity = data.number * data.length; // weight calculation varies
+        quantity = data.number * l; // weight calculation varies
       }
     }
 
@@ -168,6 +240,9 @@ export class MeasurementStore {
       createdAt: new Date().toISOString(),
     };
 
+    // Run contract validation
+    measurement.violationWarning = this.validateAgainstContract(measurement);
+
     measurements.push(measurement);
     writeAll(measurements);
     return measurement;
@@ -178,16 +253,20 @@ export class MeasurementStore {
     const index = measurements.findIndex((m) => m.id === id);
     if (index === -1) return null;
 
-    measurements[index] = { ...measurements[index], ...data };
+    let updatedMeasurement = { ...measurements[index], ...data };
 
     // Recalculate amount if rate or quantity changed
-    if (data.rate !== undefined || data.quantity !== undefined) {
-      const m = measurements[index];
-      measurements[index].amount = m.quantity * m.rate;
+    if (data.rate !== undefined || data.quantity !== undefined || data.manualDimensions !== undefined) {
+      // For simplicity, we just trust the updated quantity if provided, else rely on old logic
+      updatedMeasurement.amount = updatedMeasurement.quantity * updatedMeasurement.rate;
     }
 
+    // Run contract validation
+    updatedMeasurement.violationWarning = this.validateAgainstContract(updatedMeasurement);
+
+    measurements[index] = updatedMeasurement;
     writeAll(measurements);
-    return measurements[index];
+    return updatedMeasurement;
   }
 
   static delete(id: string): boolean {

@@ -73,7 +73,7 @@ refactor: extract measurement logic to service
 ```
 
 ### Pull Request Process
-1. Pull latest main: `git pull origin main`
+1. Pull latest rat-1: `git pull origin rat-1`
 2. Create feature branch: `git checkout -b feature/my-feature`
 3. Make changes and test locally
 4. Commit with clear messages

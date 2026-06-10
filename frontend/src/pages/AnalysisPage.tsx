@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Camera, Cpu, Check, AlertTriangle, Layers } from 'lucide-react';
 import GlassCard from '../components/GlassCard';
 import ImageUploader from '../components/ImageUploader';
@@ -50,6 +50,17 @@ export default function AnalysisPage() {
   const [stage, setStage] = useState<Stage>('upload');
   const [results, setResults] = useState<AnalysisResult[]>([]);
   const [error, setError] = useState('');
+  const [projects, setProjects] = useState<any[]>([]);
+  const [selectedProject, setSelectedProject] = useState<string>('');
+
+  useEffect(() => {
+    api.getProjects().then((data) => {
+      setProjects(data);
+      if (data.length > 0) {
+        setSelectedProject(data[0].id);
+      }
+    }).catch(console.error);
+  }, []);
 
   const stages = [
     { id: 'upload', label: 'Upload', icon: Camera },
@@ -72,7 +83,7 @@ export default function AnalysisPage() {
       // Stage 2: Analyze
       setStage('analyzing');
       const imageIds = uploadResult.uploaded.map((u: any) => u.id);
-      const analysisResult = await api.analyzeImages(imageIds);
+      const analysisResult = await api.analyzeImages(imageIds, selectedProject);
 
       setResults(analysisResult.results || []);
       setStage('complete');
@@ -143,10 +154,25 @@ export default function AnalysisPage() {
       {/* Upload Section */}
       {stage === 'upload' && (
         <GlassCard title="Upload Site Photos" subtitle="Drag & drop construction site images" icon={Camera} iconColor="blue">
+          <div style={{ marginBottom: 'var(--space-md)' }}>
+            <label style={{ display: 'block', fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>
+              Select Project to Map Measurements
+            </label>
+            <select 
+              className="select" 
+              value={selectedProject} 
+              onChange={(e) => setSelectedProject(e.target.value)}
+              style={{ width: '100%', maxWidth: '400px' }}
+            >
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
           <ImageUploader onFilesSelected={setFiles} maxFiles={10} />
           {files.length > 0 && (
             <div style={{ marginTop: 'var(--space-xl)', textAlign: 'right' }}>
-              <button className="btn btn-primary" onClick={handleAnalyze}>
+              <button className="btn btn-primary" onClick={handleAnalyze} disabled={!selectedProject}>
                 <Cpu size={18} /> Analyze {files.length} Image{files.length > 1 ? 's' : ''}
               </button>
             </div>

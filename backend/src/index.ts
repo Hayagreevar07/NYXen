@@ -100,7 +100,7 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 function seedData() {
   console.log('🌱 Checking for sample data...');
   ProjectStore.initWithSamples(SAMPLE_PROJECTS);
-  MeasurementStore.initWithSamples(SAMPLE_MEASUREMENTS);
+  // MeasurementStore.initWithSamples(SAMPLE_MEASUREMENTS); // Disabled to prevent sample data in MBook
   console.log('✅ Sample data ready');
 }
 

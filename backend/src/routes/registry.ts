@@ -21,10 +21,18 @@ router.get('/search', (req: Request, res: Response) => {
       return;
     }
 
-    // Search by survey number (partial match)
-    let results = MOCK_REGISTRY.filter((r) =>
-      r.surveyNumber.toLowerCase().includes(surveyNumber.toLowerCase())
-    );
+    // Search by survey number, village, owner, district, taluk, or landUse (partial match)
+    let results = MOCK_REGISTRY.filter((r) => {
+      const q = surveyNumber.toLowerCase();
+      return (
+        r.surveyNumber.toLowerCase().includes(q) ||
+        r.village.toLowerCase().includes(q) ||
+        r.ownerName.toLowerCase().includes(q) ||
+        r.district.toLowerCase().includes(q) ||
+        r.taluk.toLowerCase().includes(q) ||
+        r.landUse.toLowerCase().includes(q)
+      );
+    });
 
     // Filter by district if provided
     if (district && typeof district === 'string') {
